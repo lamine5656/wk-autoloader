@@ -25,7 +25,10 @@ body {
   overflow: hidden;
 }
 
-/* ---------- Fond animé : aurores + grille néon ---------- */
+/* ---------- Fond néon (statique, zéro repaint continu) ----------
+   Aucune animation infinie sur le fond : sur le WebKit de la PS5, le
+   repaint de ces immenses surfaces concurrence directement le kernel
+   exploit qui tourne dans l'iframe. Le look reste, le GPU respire. */
 
 #bg {
   position: fixed;
@@ -39,7 +42,6 @@ body {
 .orb {
   position: absolute;
   border-radius: 50%;
-  will-change: -webkit-transform, transform, opacity;
 }
 
 .orb-a {
@@ -47,8 +49,6 @@ body {
   top: -42vmax; left: -18vmax;
   background: -webkit-radial-gradient(circle at center, rgba(56, 132, 255, 0.30) 0%, rgba(56, 132, 255, 0.10) 38%, rgba(4, 6, 14, 0) 68%);
   background: radial-gradient(circle at center, rgba(56, 132, 255, 0.30) 0%, rgba(56, 132, 255, 0.10) 38%, rgba(4, 6, 14, 0) 68%);
-  -webkit-animation: orbA 14s ease-in-out infinite alternate;
-  animation: orbA 14s ease-in-out infinite alternate;
 }
 
 .orb-b {
@@ -56,26 +56,6 @@ body {
   right: -34vmax; bottom: -38vmax;
   background: -webkit-radial-gradient(circle at center, rgba(139, 92, 246, 0.26) 0%, rgba(34, 211, 238, 0.10) 40%, rgba(4, 6, 14, 0) 70%);
   background: radial-gradient(circle at center, rgba(139, 92, 246, 0.26) 0%, rgba(34, 211, 238, 0.10) 40%, rgba(4, 6, 14, 0) 70%);
-  -webkit-animation: orbB 18s ease-in-out infinite alternate;
-  animation: orbB 18s ease-in-out infinite alternate;
-}
-
-@-webkit-keyframes orbA {
-  from { -webkit-transform: translate3d(0, 0, 0) scale(1); transform: translate3d(0, 0, 0) scale(1); opacity: 0.85; }
-  to   { -webkit-transform: translate3d(6vmax, 4vmax, 0) scale(1.12); transform: translate3d(6vmax, 4vmax, 0) scale(1.12); opacity: 1; }
-}
-@keyframes orbA {
-  from { -webkit-transform: translate3d(0, 0, 0) scale(1); transform: translate3d(0, 0, 0) scale(1); opacity: 0.85; }
-  to   { -webkit-transform: translate3d(6vmax, 4vmax, 0) scale(1.12); transform: translate3d(6vmax, 4vmax, 0) scale(1.12); opacity: 1; }
-}
-
-@-webkit-keyframes orbB {
-  from { -webkit-transform: translate3d(0, 0, 0) scale(1.05); transform: translate3d(0, 0, 0) scale(1.05); opacity: 0.8; }
-  to   { -webkit-transform: translate3d(-5vmax, -4vmax, 0) scale(1); transform: translate3d(-5vmax, -4vmax, 0) scale(1); opacity: 1; }
-}
-@keyframes orbB {
-  from { -webkit-transform: translate3d(0, 0, 0) scale(1.05); transform: translate3d(0, 0, 0) scale(1.05); opacity: 0.8; }
-  to   { -webkit-transform: translate3d(-5vmax, -4vmax, 0) scale(1); transform: translate3d(-5vmax, -4vmax, 0) scale(1); opacity: 1; }
 }
 
 .grid {
@@ -92,17 +72,6 @@ body {
   transform: perspective(600px) rotateX(46deg) scale(1.28);
   -webkit-transform-origin: 50% 100%;
   transform-origin: 50% 100%;
-  -webkit-animation: gridScroll 22s linear infinite;
-  animation: gridScroll 22s linear infinite;
-}
-
-@-webkit-keyframes gridScroll {
-  from { background-position: 0 0, 0 0; }
-  to   { background-position: 0 64px, 64px 0; }
-}
-@keyframes gridScroll {
-  from { background-position: 0 0, 0 0; }
-  to   { background-position: 0 64px, 64px 0; }
 }
 
 .vignette {
@@ -110,6 +79,36 @@ body {
   top: 0; right: 0; bottom: 0; left: 0;
   background: -webkit-radial-gradient(ellipse at 50% 42%, rgba(0, 0, 0, 0) 46%, rgba(2, 3, 8, 0.72) 100%);
   background: radial-gradient(ellipse at 50% 42%, rgba(0, 0, 0, 0) 46%, rgba(2, 3, 8, 0.72) 100%);
+}
+
+/* ---------- Performance PS5 ----------
+   Une fois la chaîne lancée (body.chaining, posé par app.js au démarrage),
+   on gèle TOUTES les animations et on masque le fond décoratif : le
+   repaint permanent concurrence le kernel exploit qui tourne dans
+   l'iframe sur le WebKit de la PS5. L'écran passe en mode "sobre" :
+   fond uni, aucun filtre, aucune transition — 100 % du CPU au payload. */
+body.chaining *,
+body.chaining *::before,
+body.chaining *::after {
+  -webkit-animation: none !important;
+  animation: none !important;
+  -webkit-transition: none !important;
+  transition: none !important;
+}
+body.chaining #bg { display: none; }
+body.chaining body,
+body.chaining {
+  background: #04060e;
+}
+body.chaining .logo,
+body.chaining #splash .logo {
+  -webkit-filter: none;
+  filter: none;
+}
+body.chaining #progressRing .ring-fill,
+body.chaining #progressDot {
+  -webkit-filter: none;
+  filter: none;
 }
 
 /* ---------- Footer ---------- */
@@ -160,8 +159,8 @@ body {
 #splash.hide {
   opacity: 0;
   visibility: hidden;
-  -webkit-transition: opacity 0.45s ease-in, visibility 0s linear 0.45s;
-  transition: opacity 0.45s ease-in, visibility 0s linear 0.45s;
+  -webkit-transition: opacity 0.25s ease-in, visibility 0s linear 0.25s;
+  transition: opacity 0.25s ease-in, visibility 0s linear 0.25s;
 }
 
 #splashCard {
@@ -187,8 +186,8 @@ body {
 #splash .logo {
   width: 8.5rem;
   height: 8.5rem;
-  -webkit-animation: splash-in 0.8s ease-out both;
-  animation: splash-in 0.8s ease-out both;
+  -webkit-animation: splash-in 0.5s ease-out both;
+  animation: splash-in 0.5s ease-out both;
   -webkit-filter: drop-shadow(0 0 22px rgba(59, 130, 246, 0.55));
   filter: drop-shadow(0 0 22px rgba(59, 130, 246, 0.55));
 }
@@ -199,8 +198,8 @@ body {
   font-weight: 800;
   letter-spacing: 0.06em;
   color: #ffffff;
-  -webkit-animation: splash-in 0.8s ease-out 0.15s both;
-  animation: splash-in 0.8s ease-out 0.15s both;
+  -webkit-animation: splash-in 0.5s ease-out 0.08s both;
+  animation: splash-in 0.5s ease-out 0.08s both;
   text-align: center;
 }
 #splash h1 span {
@@ -222,8 +221,8 @@ body {
   border: 1px solid rgba(56, 189, 248, 0.45);
   border-radius: 999px;
   background: rgba(56, 189, 248, 0.08);
-  -webkit-animation: splash-in 0.8s ease-out 0.25s both;
-  animation: splash-in 0.8s ease-out 0.25s both;
+  -webkit-animation: splash-in 0.5s ease-out 0.14s both;
+  animation: splash-in 0.5s ease-out 0.14s both;
 }
 
 .splash-sub {
@@ -234,8 +233,8 @@ body {
   font-weight: 600;
   line-height: 1.5;
   text-align: center;
-  -webkit-animation: splash-in 0.8s ease-out 0.35s both;
-  animation: splash-in 0.8s ease-out 0.35s both;
+  -webkit-animation: splash-in 0.5s ease-out 0.2s both;
+  animation: splash-in 0.5s ease-out 0.2s both;
 }
 
 @-webkit-keyframes splash-in {
@@ -319,8 +318,7 @@ body {
   stroke-dashoffset: 552.9;
   -webkit-transition: stroke-dashoffset 0.7s cubic-bezier(0.22, 1, 0.36, 1);
   transition: stroke-dashoffset 0.7s cubic-bezier(0.22, 1, 0.36, 1);
-  -webkit-filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.65));
-  filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.65));
+}
 }
 body.done #progressRing .ring-fill {
   stroke: #22c55e;

@@ -51,7 +51,6 @@
     .orb {
       position: absolute;
       border-radius: 50%;
-      will-change: -webkit-transform, transform, opacity;
     }
 
     .orb-a {
@@ -59,8 +58,6 @@
       top: -42vmax; left: -18vmax;
       background: -webkit-radial-gradient(circle at center, rgba(56, 132, 255, 0.30) 0%, rgba(56, 132, 255, 0.10) 38%, rgba(4, 6, 14, 0) 68%);
       background: radial-gradient(circle at center, rgba(56, 132, 255, 0.30) 0%, rgba(56, 132, 255, 0.10) 38%, rgba(4, 6, 14, 0) 68%);
-      -webkit-animation: orbA 14s ease-in-out infinite alternate;
-      animation: orbA 14s ease-in-out infinite alternate;
     }
 
     .orb-b {
@@ -68,26 +65,6 @@
       right: -34vmax; bottom: -38vmax;
       background: -webkit-radial-gradient(circle at center, rgba(139, 92, 246, 0.26) 0%, rgba(34, 211, 238, 0.10) 40%, rgba(4, 6, 14, 0) 70%);
       background: radial-gradient(circle at center, rgba(139, 92, 246, 0.26) 0%, rgba(34, 211, 238, 0.10) 40%, rgba(4, 6, 14, 0) 70%);
-      -webkit-animation: orbB 18s ease-in-out infinite alternate;
-      animation: orbB 18s ease-in-out infinite alternate;
-    }
-
-    @-webkit-keyframes orbA {
-      from { -webkit-transform: translate3d(0, 0, 0) scale(1); transform: translate3d(0, 0, 0) scale(1); opacity: 0.85; }
-      to   { -webkit-transform: translate3d(6vmax, 4vmax, 0) scale(1.12); transform: translate3d(6vmax, 4vmax, 0) scale(1.12); opacity: 1; }
-    }
-    @keyframes orbA {
-      from { -webkit-transform: translate3d(0, 0, 0) scale(1); transform: translate3d(0, 0, 0) scale(1); opacity: 0.85; }
-      to   { -webkit-transform: translate3d(6vmax, 4vmax, 0) scale(1.12); transform: translate3d(6vmax, 4vmax, 0) scale(1.12); opacity: 1; }
-    }
-
-    @-webkit-keyframes orbB {
-      from { -webkit-transform: translate3d(0, 0, 0) scale(1.05); transform: translate3d(0, 0, 0) scale(1.05); opacity: 0.8; }
-      to   { -webkit-transform: translate3d(-5vmax, -4vmax, 0) scale(1); transform: translate3d(-5vmax, -4vmax, 0) scale(1); opacity: 1; }
-    }
-    @keyframes orbB {
-      from { -webkit-transform: translate3d(0, 0, 0) scale(1.05); transform: translate3d(0, 0, 0) scale(1.05); opacity: 0.8; }
-      to   { -webkit-transform: translate3d(-5vmax, -4vmax, 0) scale(1); transform: translate3d(-5vmax, -4vmax, 0) scale(1); opacity: 1; }
     }
 
     .grid {
@@ -104,17 +81,6 @@
       transform: perspective(600px) rotateX(46deg) scale(1.28);
       -webkit-transform-origin: 50% 100%;
       transform-origin: 50% 100%;
-      -webkit-animation: gridScroll 22s linear infinite;
-      animation: gridScroll 22s linear infinite;
-    }
-
-    @-webkit-keyframes gridScroll {
-      from { background-position: 0 0, 0 0; }
-      to   { background-position: 0 64px, 64px 0; }
-    }
-    @keyframes gridScroll {
-      from { background-position: 0 0, 0 0; }
-      to   { background-position: 0 64px, 64px 0; }
     }
 
     .vignette {
@@ -141,17 +107,6 @@
       margin-bottom: 1.5rem;
       -webkit-filter: drop-shadow(0 0 18px rgba(34, 211, 238, 0.45));
       filter: drop-shadow(0 0 18px rgba(34, 211, 238, 0.45));
-      -webkit-animation: logoPulse 4.5s ease-in-out infinite;
-      animation: logoPulse 4.5s ease-in-out infinite;
-    }
-
-    @-webkit-keyframes logoPulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.82; }
-    }
-    @keyframes logoPulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.82; }
     }
 
     h1 {
@@ -183,17 +138,6 @@
       font-weight: 600;
       color: #22d3ee;
       margin-bottom: 0.5rem;
-      -webkit-animation: statusPulse 2s ease-in-out infinite;
-      animation: statusPulse 2s ease-in-out infinite;
-    }
-
-    @-webkit-keyframes statusPulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.55; }
-    }
-    @keyframes statusPulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.55; }
     }
 
     body.done #status {

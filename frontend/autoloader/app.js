@@ -517,6 +517,9 @@
         ? 'poops (kernel 7.00-12.00)'
         : 'relapse (kernel 7.00-13.60)'), 'success');
     exploitMode = picked;
+    /* Gel des animations décoratives : le repaint permanent concurrence le
+       kernel exploit dans l'iframe sur le WebKit de la PS5. */
+    try { document.body.classList.add('chaining'); } catch (eChain) { }
     var exploitUrl = picked === 'umtx2' ? UMTX2_URL
       : picked === 'poops' ? POOPS_URL
       : RELAPSE_URL;
@@ -547,9 +550,15 @@
       exploitEl.src = exploitUrl;
     } catch (e) { }
 
-    setTimeout(revealExploit, 1500);
+    /* Révélation accélérée (0.6s vs 1.5s upstream) : l'iframe est déjà
+       armée ci-dessus, la splash ne fait que masquer le log. */
+    setTimeout(revealExploit, 600);
   }
 
 
-  window.addEventListener('load', start);
+  /* Démarrage immédiat : le script est en fin de body, le DOM est prêt.
+     On n'attend pas l'événement 'load' (logo, favicon…) : l'iframe de
+     l'exploit est armée plusieurs centaines de ms plus tôt que la version
+     upstream, qui démarre sur 'load'. */
+  start();
 })();
