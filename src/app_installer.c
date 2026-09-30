@@ -39,6 +39,35 @@ int sceAppInstUtilAppUnInstall(const char *);
  * it that way if WKAL_TITLE_ID is ever changed. */
 _Static_assert(sizeof(WKAL_TITLE_ID) <= 16, "WKAL_TITLE_ID too long for path buffers");
 
+/* Title IDs previously shipped with an invalid format (L92WKAL01) that PS5
+ * installs but never shows on the homescreen. Uninstall any leftover copy at
+ * startup so the ghost app (and its wasted cache) disappears silently. */
+static const char *const GHOST_TITLE_IDS[] = {"L92WKAL01"};
+
+static void uninstall_ghost_apps(void) {
+  struct stat st;
+  int did_init = 0;
+  for (size_t i = 0; i < sizeof(GHOST_TITLE_IDS) / sizeof(GHOST_TITLE_IDS[0]);
+       i++) {
+    char dir[256];
+    snprintf(dir, sizeof(dir), "/user/app/%s", GHOST_TITLE_IDS[i]);
+    if (stat(dir, &st) != 0)
+      continue; /* not installed */
+    if (!did_init) {
+      if (sceAppInstUtilInitialize() != 0)
+        return; /* non-fatal */
+      did_init = 1;
+    }
+    if (sceAppInstUtilAppUnInstall(GHOST_TITLE_IDS[i]) == 0) {
+      wkali_log("[WKALI] Removed invalid-format app %s\n", GHOST_TITLE_IDS[i]);
+    } else {
+      wkali_log("[WKALI] Could not remove %s (non-fatal)\n", GHOST_TITLE_IDS[i]);
+    }
+  }
+  if (did_init)
+    sceAppInstUtilTerminate();
+}
+
 static int mkdir_p(const char *path, mode_t mode) {
   char tmp[256];
   snprintf(tmp, sizeof(tmp), "%s", path);
@@ -129,6 +158,8 @@ int wkali_install_app_if_needed(void) {
   char base_dir[256];
   char param_path[256];
   char icon_path[256];
+
+  uninstall_ghost_apps();
 
   snprintf(base_dir, sizeof(base_dir), "/user/app/%s", title_id);
   snprintf(param_path, sizeof(param_path), "/user/app/%s/sce_sys/param.json",
