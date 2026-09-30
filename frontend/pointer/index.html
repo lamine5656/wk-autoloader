@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
 
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WebKit Autoloader</title>
+  <title>L92 WebKit Autoloader</title>
   <style>
     * {
       margin: 0;
@@ -20,9 +20,10 @@
 
     body {
       font-family: -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
-      background: #0f172a;
-      background: -webkit-linear-gradient(180deg, #0f172a 0%, #0b1220 100%);
-      color: #e2e8f0;
+      background: #04060e;
+      background: -webkit-linear-gradient(180deg, #070b18 0%, #04060e 100%);
+      background: linear-gradient(180deg, #070b18 0%, #04060e 100%);
+      color: #e6f1ff;
       display: -webkit-box;
       display: -webkit-flex;
       display: flex;
@@ -39,18 +40,24 @@
     p {
       font-size: 1.375rem;
       line-height: 1.5;
-      color: #94a3b8;
+      color: #8ea3c0;
     }
 
     p.bad {
       color: #f87171;
+      text-shadow: 0 0 14px rgba(239, 68, 68, 0.4);
+    }
+
+    p.ok {
+      color: #22d3ee;
+      text-shadow: 0 0 14px rgba(34, 211, 238, 0.4);
     }
   </style>
 </head>
 
 <body>
   <main>
-    <p id="status">Loading&hellip;</p>
+    <p id="status">Chargement&hellip;</p>
   </main>
 
   <script>
@@ -62,7 +69,7 @@
       var statusEl = document.getElementById('status');
 
       function fail() {
-        statusEl.textContent = 'Cache incomplete - run the installer again.';
+        statusEl.textContent = 'Cache incomplet — relancez l\'installateur.';
         statusEl.className = 'bad';
       }
 
@@ -77,6 +84,8 @@
         })
         .then(function (t) {
           if (t.trim() === version) {
+            statusEl.textContent = 'Chargement de L92 WebKit Autoloader…';
+            statusEl.className = 'ok';
             window.location.replace('/app/' + dir + '/index.html');
           } else {
             fail();

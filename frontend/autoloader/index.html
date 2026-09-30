@@ -1,35 +1,63 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
 
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <title>WebKit Autoloader v[[VERSION_PLACEHOLDER]] by PLK (built [[BUILD_TIME_PLACEHOLDER]])</title>
+  <title>L92 WebKit Autoloader v[[VERSION_PLACEHOLDER]]</title>
 </head>
 
 <body>
+  <!-- Fond animé : aurores + grille néon (transform-only, PS5-safe) -->
+  <div id="bg" aria-hidden="true">
+    <div class="orb orb-a"></div>
+    <div class="orb orb-b"></div>
+    <div class="grid"></div>
+    <div class="vignette"></div>
+  </div>
+
   <div id="splash" aria-hidden="false">
-    <img class="logo" src="logo.svg" alt="WebKit Autoloader" />
-    <h1>WebKit Autoloader</h1>
+    <div id="splashCard">
+      <img class="logo" src="logo.svg" alt="L92 WebKit Autoloader" />
+      <h1>L92 <span>WebKit Autoloader</span></h1>
+      <p class="splash-ver">v[[VERSION_PLACEHOLDER]]</p>
+      <p class="splash-sub">Chargement des payloads via autoload.txt &mdash; le navigateur se ferme automatiquement</p>
+    </div>
   </div>
 
   <iframe id="exploit" title="exploit"></iframe>
 
-
   <main id="loader">
-    <div id="logWrapper">
-      <div id="logContainer"></div>
+    <div id="progressContainer">
+      <svg id="progressRing" viewBox="0 0 200 200" aria-hidden="true">
+        <defs>
+          <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#22d3ee" />
+            <stop offset="55%" stop-color="#3b82f6" />
+            <stop offset="100%" stop-color="#8b5cf6" />
+          </linearGradient>
+        </defs>
+        <circle class="ring-track" cx="100" cy="100" r="88" />
+        <circle class="ring-fill" id="progressBar" cx="100" cy="100" r="88"
+                transform="rotate(-90 100 100)" />
+      </svg>
+      <div id="ringCenter">
+        <div id="progressPct">0%</div>
+      </div>
     </div>
 
-    <div id="progressContainer">
-      <div id="progressBar"></div>
-      <div id="progressLabel">Loading...</div>
+    <div id="progressLabelWrap">
+      <span id="progressDot" aria-hidden="true"></span>
+      <span id="progressLabel">Démarrage&hellip;</span>
     </div>
   </main>
 
-  <footer id="footer">WebKit Autoloader v[[VERSION_PLACEHOLDER]] by PLK (built [[BUILD_TIME_PLACEHOLDER]])<br />This project is free and open source: github.com/itsPLK/ps5-webkit-autoloader</footer>
+  <footer id="footer">
+    <b>L92 WebKit Autoloader</b> v[[VERSION_PLACEHOLDER]] &middot; par <b>L92</b>
+    &middot; d'apr&egrave;s ps5-webkit-autoloader (itsPLK) &middot; cha&icirc;nes umtx2 &amp; relapse
+  </footer>
 
   <script src="app.js"></script>
 </body>

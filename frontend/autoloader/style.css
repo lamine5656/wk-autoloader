@@ -1,3 +1,10 @@
+/* ============================================================
+   L92 WebKit Autoloader — thème néon "midnight drive"
+   100 % compatible PS5 WebKit : transform/opacity seulement
+   pour les animations, -webkit- préfixes partout, pas de
+   backdrop-filter, pas de CSS variables.
+   ============================================================ */
+
 * {
   margin: 0;
   padding: 0;
@@ -12,12 +19,100 @@ body {
 
 body {
   font-family: -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
-  background: #0f172a;
-  background: -webkit-linear-gradient(180deg, #0f172a 0%, #0b1220 100%);
-  color: #e2e8f0;
+  background: #04060e;
+  color: #e6f1ff;
   min-height: 100%;
   overflow: hidden;
 }
+
+/* ---------- Fond animé : aurores + grille néon ---------- */
+
+#bg {
+  position: fixed;
+  top: 0; right: 0; bottom: 0; left: 0;
+  z-index: 0;
+  background: #04060e;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  will-change: -webkit-transform, transform, opacity;
+}
+
+.orb-a {
+  width: 90vmax; height: 90vmax;
+  top: -42vmax; left: -18vmax;
+  background: -webkit-radial-gradient(circle at center, rgba(56, 132, 255, 0.30) 0%, rgba(56, 132, 255, 0.10) 38%, rgba(4, 6, 14, 0) 68%);
+  background: radial-gradient(circle at center, rgba(56, 132, 255, 0.30) 0%, rgba(56, 132, 255, 0.10) 38%, rgba(4, 6, 14, 0) 68%);
+  -webkit-animation: orbA 14s ease-in-out infinite alternate;
+  animation: orbA 14s ease-in-out infinite alternate;
+}
+
+.orb-b {
+  width: 80vmax; height: 80vmax;
+  right: -34vmax; bottom: -38vmax;
+  background: -webkit-radial-gradient(circle at center, rgba(139, 92, 246, 0.26) 0%, rgba(34, 211, 238, 0.10) 40%, rgba(4, 6, 14, 0) 70%);
+  background: radial-gradient(circle at center, rgba(139, 92, 246, 0.26) 0%, rgba(34, 211, 238, 0.10) 40%, rgba(4, 6, 14, 0) 70%);
+  -webkit-animation: orbB 18s ease-in-out infinite alternate;
+  animation: orbB 18s ease-in-out infinite alternate;
+}
+
+@-webkit-keyframes orbA {
+  from { -webkit-transform: translate3d(0, 0, 0) scale(1); transform: translate3d(0, 0, 0) scale(1); opacity: 0.85; }
+  to   { -webkit-transform: translate3d(6vmax, 4vmax, 0) scale(1.12); transform: translate3d(6vmax, 4vmax, 0) scale(1.12); opacity: 1; }
+}
+@keyframes orbA {
+  from { -webkit-transform: translate3d(0, 0, 0) scale(1); transform: translate3d(0, 0, 0) scale(1); opacity: 0.85; }
+  to   { -webkit-transform: translate3d(6vmax, 4vmax, 0) scale(1.12); transform: translate3d(6vmax, 4vmax, 0) scale(1.12); opacity: 1; }
+}
+
+@-webkit-keyframes orbB {
+  from { -webkit-transform: translate3d(0, 0, 0) scale(1.05); transform: translate3d(0, 0, 0) scale(1.05); opacity: 0.8; }
+  to   { -webkit-transform: translate3d(-5vmax, -4vmax, 0) scale(1); transform: translate3d(-5vmax, -4vmax, 0) scale(1); opacity: 1; }
+}
+@keyframes orbB {
+  from { -webkit-transform: translate3d(0, 0, 0) scale(1.05); transform: translate3d(0, 0, 0) scale(1.05); opacity: 0.8; }
+  to   { -webkit-transform: translate3d(-5vmax, -4vmax, 0) scale(1); transform: translate3d(-5vmax, -4vmax, 0) scale(1); opacity: 1; }
+}
+
+.grid {
+  position: absolute;
+  top: -12%; right: -20%; bottom: -12%; left: -20%;
+  background-image:
+    -webkit-linear-gradient(rgba(96, 165, 250, 0.09) 1px, rgba(0, 0, 0, 0) 1px),
+    -webkit-linear-gradient(90deg, rgba(96, 165, 250, 0.09) 1px, rgba(0, 0, 0, 0) 1px);
+  background-image:
+    linear-gradient(rgba(96, 165, 250, 0.09) 1px, rgba(0, 0, 0, 0) 1px),
+    linear-gradient(90deg, rgba(96, 165, 250, 0.09) 1px, rgba(0, 0, 0, 0) 1px);
+  background-size: 64px 64px;
+  -webkit-transform: perspective(600px) rotateX(46deg) scale(1.28);
+  transform: perspective(600px) rotateX(46deg) scale(1.28);
+  -webkit-transform-origin: 50% 100%;
+  transform-origin: 50% 100%;
+  -webkit-animation: gridScroll 22s linear infinite;
+  animation: gridScroll 22s linear infinite;
+}
+
+@-webkit-keyframes gridScroll {
+  from { background-position: 0 0, 0 0; }
+  to   { background-position: 0 64px, 64px 0; }
+}
+@keyframes gridScroll {
+  from { background-position: 0 0, 0 0; }
+  to   { background-position: 0 64px, 64px 0; }
+}
+
+.vignette {
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  background: -webkit-radial-gradient(ellipse at 50% 42%, rgba(0, 0, 0, 0) 46%, rgba(2, 3, 8, 0.72) 100%);
+  background: radial-gradient(ellipse at 50% 42%, rgba(0, 0, 0, 0) 46%, rgba(2, 3, 8, 0.72) 100%);
+}
+
+/* ---------- Footer ---------- */
 
 #footer {
   position: fixed;
@@ -26,15 +121,16 @@ body {
   -webkit-transform: translateX(-50%);
   transform: translateX(-50%);
   font-size: 0.75rem;
-  color: #4b5563;
+  color: #8ea3c4;
   line-height: 1.5;
   text-align: center;
   z-index: 20;
+  width: 94vw;
 }
+#footer b { color: #cfe3ff; font-weight: 600; }
 
+/* ---------- Splash screen L92 ---------- */
 
-
-/* Splash screen: shown before the loader, animate out once at startup */
 #splash {
   position: fixed;
   top: 0;
@@ -55,8 +151,7 @@ body {
   -webkit-box-pack: center;
   -webkit-justify-content: center;
   justify-content: center;
-  background: #0f172a;
-  background: -webkit-linear-gradient(180deg, #0f172a 0%, #0b1220 100%);
+  background: transparent;
   opacity: 1;
   -webkit-transition: opacity 0.45s ease-in, visibility 0s linear 0.45s;
   transition: opacity 0.45s ease-in, visibility 0s linear 0.45s;
@@ -69,21 +164,78 @@ body {
   transition: opacity 0.45s ease-in, visibility 0s linear 0.45s;
 }
 
+#splashCard {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  align-items: center;
+  width: min(480px, 88vw);
+  padding: 44px 36px 34px;
+  background: rgba(7, 11, 24, 0.82);
+  border-radius: 24px;
+  border: 1px solid rgba(120, 170, 255, 0.22);
+  -webkit-box-shadow: 0 18px 48px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(96, 165, 250, 0.06) inset;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(96, 165, 250, 0.06) inset;
+}
+
 #splash .logo {
-  width: 11rem;
-  height: 11rem;
+  width: 8.5rem;
+  height: 8.5rem;
   -webkit-animation: splash-in 0.8s ease-out both;
   animation: splash-in 0.8s ease-out both;
+  -webkit-filter: drop-shadow(0 0 22px rgba(59, 130, 246, 0.55));
+  filter: drop-shadow(0 0 22px rgba(59, 130, 246, 0.55));
 }
 
 #splash h1 {
-  margin-top: 1.75rem;
-  font-size: 2.5rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: #e2e8f0;
+  margin-top: 1.4rem;
+  font-size: 2.1rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #ffffff;
   -webkit-animation: splash-in 0.8s ease-out 0.15s both;
   animation: splash-in 0.8s ease-out 0.15s both;
+  text-align: center;
+}
+#splash h1 span {
+  background: -webkit-linear-gradient(90deg, #22d3ee, #3b82f6, #8b5cf6);
+  background: linear-gradient(90deg, #22d3ee, #3b82f6, #8b5cf6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.splash-ver {
+  margin: 0.65rem 0 0;
+  padding: 3px 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #7dd3fc;
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.08);
+  -webkit-animation: splash-in 0.8s ease-out 0.25s both;
+  animation: splash-in 0.8s ease-out 0.25s both;
+}
+
+.splash-sub {
+  margin: 1.1rem 0 0;
+  max-width: 40ch;
+  color: #8ea3c4;
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
+  -webkit-animation: splash-in 0.8s ease-out 0.35s both;
+  animation: splash-in 0.8s ease-out 0.35s both;
 }
 
 @-webkit-keyframes splash-in {
@@ -112,9 +264,8 @@ body {
   }
 }
 
+/* ---------- Loader UI : anneau + log ---------- */
 
-
-/* Loader UI: centered */
 #loader {
   position: relative;
   z-index: 10;
@@ -132,8 +283,8 @@ body {
   -webkit-box-pack: center;
   -webkit-justify-content: center;
   justify-content: center;
-  background: #0f172a;
-  background: -webkit-linear-gradient(180deg, #0f172a 0%, #0b1220 100%);
+  background: transparent;
+  gap: 10px;
 }
 
 /* The iframe's document runs the exploit and reports back to app.js. */
@@ -141,17 +292,127 @@ body {
   display: none;
 }
 
+/* Anneau de progression SVG */
+
+#progressContainer {
+  position: relative;
+  width: 170px;
+  height: 170px;
+  margin: 0 0 6px;
+}
+#progressRing {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+}
+#progressRing .ring-track {
+  fill: none;
+  stroke: rgba(96, 130, 190, 0.22);
+  stroke-width: 10;
+}
+#progressRing .ring-fill {
+  fill: none;
+  stroke: url(#ringGrad);
+  stroke-width: 10;
+  stroke-linecap: round;
+  stroke-dasharray: 552.9;
+  stroke-dashoffset: 552.9;
+  -webkit-transition: stroke-dashoffset 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: stroke-dashoffset 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  -webkit-filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.65));
+  filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.65));
+}
+body.done #progressRing .ring-fill {
+  stroke: #22c55e;
+  -webkit-transition: stroke-dashoffset 0.5s ease, stroke 0.4s ease;
+  transition: stroke-dashoffset 0.5s ease, stroke 0.4s ease;
+}
+body.fail #progressRing .ring-fill {
+  stroke: #ef4444;
+  -webkit-transition: stroke-dashoffset 0.5s ease, stroke 0.4s ease;
+  transition: stroke-dashoffset 0.5s ease, stroke 0.4s ease;
+}
+
+#ringCenter {
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+}
+#progressPct {
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-shadow: 0 0 16px rgba(96, 165, 250, 0.55);
+}
+body.done #progressPct { color: #86efac; }
+body.fail #progressPct { color: #fca5a5; }
+
+/* Libellé de progression */
+
+#progressLabelWrap {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  align-items: center;
+  max-width: 82vw;
+  min-height: 1.6em;
+}
+#progressDot {
+  width: 9px;
+  height: 9px;
+  margin-right: 10px;
+  border-radius: 50%;
+  background: #3b82f6;
+  -webkit-box-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
+  -webkit-animation: pulse 1.4s ease-in-out infinite;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+body.done #progressDot { background: #22c55e; -webkit-box-shadow: 0 0 10px rgba(34,197,94,.8); box-shadow: 0 0 10px rgba(34,197,94,.8); -webkit-animation: none; animation: none; }
+body.fail #progressDot { background: #ef4444; -webkit-box-shadow: 0 0 10px rgba(239,68,68,.8); box-shadow: 0 0 10px rgba(239,68,68,.8); -webkit-animation: none; animation: none; }
+@-webkit-keyframes pulse {
+  0%, 100% { opacity: 1; -webkit-transform: scale(1); transform: scale(1); }
+  50% { opacity: 0.45; -webkit-transform: scale(0.8); transform: scale(0.8); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; -webkit-transform: scale(1); transform: scale(1); }
+  50% { opacity: 0.45; -webkit-transform: scale(0.8); transform: scale(0.8); }
+}
+
+#progressLabel {
+  color: #dbe7fb;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Journal technique */
+
 #logWrapper {
   width: 82%;
-  height: 72%;
+  height: 46%;
   max-width: 1220px;
-  background: #05070d;
-  border: 1px solid #1e3a5f;
-  border-radius: 10px;
+  background: rgba(5, 8, 16, 0.88);
+  border: 1px solid rgba(120, 170, 255, 0.25);
+  border-radius: 14px;
   overflow-y: auto;
   font-family: "SFMono-Regular", Menlo, Monaco, "Cascadia Mono", monospace;
-  font-size: 1.05rem;
-  line-height: 1.6;
+  font-size: 1.02rem;
+  line-height: 1.55;
   padding: 1rem 1.25rem;
 }
 
@@ -171,7 +432,7 @@ body {
 }
 
 #logContainer .success {
-  color: #7df966;
+  color: #4ade80;
 }
 
 #logContainer .warning {
@@ -180,51 +441,4 @@ body {
 
 #logContainer .error {
   color: #f87171;
-}
-
-#progressContainer {
-  position: relative;
-  width: 82%;
-  max-width: 1220px;
-  height: 3rem;
-  margin-top: 1.75rem;
-  background: #1b2436;
-  border: 1px solid #2c3e5a;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-#progressBar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 0%;
-  background: #38bdf8;
-  background: -webkit-linear-gradient(90deg, #2563eb 0%, #38bdf8 100%);
-  -webkit-transition: width 0.5s ease-in-out;
-  transition: width 0.5s ease-in-out;
-}
-
-#progressLabel {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: flex;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  justify-content: center;
-  color: #fff;
-  font-size: 1rem;
-  font-weight: 600;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
-  z-index: 1;
-  pointer-events: none;
 }

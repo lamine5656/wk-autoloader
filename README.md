@@ -1,140 +1,135 @@
 <p align="center">
  <img src="./assets/icon.svg" width="128" />
 </p>
-<h1 align="center">PS5 WebKit Autoloader</h1>
+<h1 align="center">L92 WebKit Autoloader</h1>
 &nbsp;
-<p align="center">Automatically loads the WebKit exploit and your elf payloads.<br>Supports firmwares <b>1.00&ndash;5.50</b> and <b>7.00&ndash;13.60</b>.</p>
+<p align="center"><b>par L92</b> — d'après <a href="https://github.com/itsPLK/ps5-webkit-autoloader">ps5-webkit-autoloader</a> de itsPLK<br>Charge automatiquement l'exploit WebKit et vos payloads ELF.<br>Supporte les firmwares <b>1.00&ndash;5.50</b> et <b>7.00&ndash;13.60</b>.</p>
 
 <p align="center">
-  <a href=".github/screenshots/webkit_autoloader.jpeg"><img src=".github/screenshots/webkit_autoloader.jpeg" width="260" alt="WebKit Autoloader - exploit running" /></a>
-  <a href=".github/screenshots/webkit_autoloader_installer.jpeg"><img src=".github/screenshots/webkit_autoloader_installer.jpeg" width="260" alt="Installer" /></a>
+  <a href=".github/screenshots/webkit_autoloader.jpeg"><img src=".github/screenshots/webkit_autoloader.jpeg" width="260" alt="L92 WebKit Autoloader - exploit en cours" /></a>
+  <a href=".github/screenshots/webkit_autoloader_installer.jpeg"><img src=".github/screenshots/webkit_autoloader_installer.jpeg" width="260" alt="Installateur" /></a>
 </p>
 
-<p align="center">
-    <b>Other Autoloaders:</b><br>
-    <a href="https://github.com/itsPLK/ps5-y2jb-autoloader">Y2JB</a> |
-    <a href="https://github.com/itsPLK/ps5-bdjb-autoloader">BD-JB</a> |
-    <a href="https://github.com/itsPLK/ps5-lua-autoloader">Lua</a>
-</p>
+## Pourquoi L92 WebKit Autoloader ?
 
-## Why WebKit Autoloader?
+Les exploits WebKit sont généralement chargés en pointant le DNS de votre PS5 vers un serveur hébergé par quelqu'un sur Internet. Cela signifie que vous accordez votre confiance à la personne qui gère ce serveur — et s'il tombe en panne, change ou disparaît, votre installation est cassée.
 
-WebKit exploits are usually loaded by pointing your PS5's DNS at some server hosted by someone on the internet. That means you're putting your trust in whoever runs that server — and if it goes down, changes, or disappears, your setup breaks.
+Cet autoloader fait différemment :
 
-This autoloader does it differently:
+- **100 % hors ligne, aucun DNS tiers.** Après une installation unique depuis votre PC, tout est servi directement depuis votre PS5. Rien d'externe ne peut tomber en panne ou changer dans votre dos.
+- **Configuration unique, puis raccourci sur l'accueil.** Une fois installé, vous n'avez plus besoin de PC ni de réseau — lancez simplement **L92 WebKit Autoloader** depuis l'accueil et c'est parti.
+- **Payloads chargés comme vous en avez l'habitude.** Après l'exécution de la chaîne d'exploits, vos payloads sont envoyés via **Payload Manager**, ou via un fichier `autoload.txt` personnalisé.
 
-- **Fully offline, no third-party DNS.** After a one-time install from your PC, everything is served straight from your PS5. There's nothing external to go down or change behind your back.  
-  Firmwares 12.02–13.60 run **Relapse**, which requires an active network interface (Wi-Fi or Ethernet connected to a local network; Internet access is not required).
-- **One-time setup, then a homescreen shortcut.** Once it's installed, you don't need a PC or the internet — just launch "WebKit Autoloader" from the homescreen and you're done.
-- **Payloads loaded the way you already know.** After the exploit chain runs, your payloads are sent just like in [Y2JB](https://github.com/itsPLK/ps5-y2jb-autoloader) / [BD-JB](https://github.com/itsPLK/ps5-bdjb-autoloader) / [Lua](https://github.com/itsPLK/ps5-lua-autoloader) autoloaders — via **Payload Manager**, or a custom `autoload.txt`.
+- **100 % hors ligne (Poops), aucun DNS tiers.** Après une installation unique depuis votre PC, tout est servi directement depuis votre PS5. Rien d'externe ne peut tomber en panne ou changer dans votre dos.  
+  Poops fonctionne **entièrement hors ligne**. Relapse (firmwares 12.02–13.60) nécessite une interface réseau active (Wi-Fi ou Ethernet reliés à un réseau local ; l'accès à Internet n'est pas requis).
+- **Configuration unique, puis raccourci sur l'accueil.** Une fois installé, vous n'avez plus besoin de PC ni de réseau — lancez simplement **L92 WebKit Autoloader** depuis l'accueil et c'est parti.
+- **Payloads chargés comme vous en avez l'habitude.** Après l'exécution de la chaîne d'exploits, vos payloads sont envoyés comme dans les autoloaders [Y2JB](https://github.com/itsPLK/ps5-y2jb-autoloader) / [BD-JB](https://github.com/itsPLK/ps5-bdjb-autoloader) / [Lua](https://github.com/itsPLK/ps5-lua-autoloader) — via **Payload Manager**, ou un fichier `autoload.txt` personnalisé.
 
 
-## Setup Instructions
+## Instructions d'installation
 
-There are two ways to set up the autoloader, depending on whether you're already jailbroken.
+Deux méthodes selon que votre console est déjà jailbreakée ou non.
 
-### Already jailbroken? Just load the installer ELF
+### Déjà jailbreaké ? Chargez simplement l'ELF d'installation
 
-1. Download `webkit-autoloader-installer_vX.Y.Z.elf` from the [Releases](https://github.com/itsPLK/ps5-webkit-autoloader/releases) page.
-2. Send it to your PS5 with `elfldr`, or launch it from Payload Manager.
-3. The installer opens the browser once to cache the autoloader page, then creates the **WebKit Autoloader** app on the homescreen and exits.
-4. **Reboot once**, then launch **WebKit Autoloader** from the homescreen.
+1. Téléchargez `webkit-autoloader-installer_vX.Y.Z.elf` depuis la page [Releases](https://github.com/lamine5656/ps5-webkit-autoloader/releases).
+2. Envoyez-le à votre PS5 avec `elfldr`, ou lancez-le depuis Payload Manager.
+3. L'installateur ouvre le navigateur une fois pour mettre en cache la page de l'autoloader, crée l'application **L92 WebKit Autoloader** sur l'accueil, puis se ferme.
+4. **Redémarrez une fois**, puis lancez **L92 WebKit Autoloader** depuis l'accueil.
 
-### Not jailbroken yet
+### Pas encore jailbreaké
 
-If you aren't jailbroken yet, you'll need to host the exploit locally on your PC for the initial setup:
+Si votre console n'est pas encore jailbreakée, vous devrez héberger l'exploit localement sur votre PC pour la configuration initiale :
 
-1. Download `webkit-autoloader-host.py` (or the `.exe`) from the [Releases](https://github.com/itsPLK/ps5-webkit-autoloader/releases) and run it on a PC on your network.
-2. On your PS5, set your network's DNS server to your PC's IP address.
-3. Open the **User's Guide** from Settings to run the installer, which adds the **WebKit Autoloader** app to your homescreen.
-4. Launch **WebKit Autoloader** from the homescreen.
+1. Téléchargez `webkit-autoloader-host.py` (ou le `.exe`) depuis les [Releases](https://github.com/lamine5656/ps5-webkit-autoloader/releases) et lancez-le sur un PC de votre réseau.
+2. Sur votre PS5, réglez le DNS de votre réseau sur l'adresse IP de votre PC.
+3. Ouvrez le **Guide de l'utilisateur** depuis les Paramètres pour lancer l'installateur, qui ajoute l'application **L92 WebKit Autoloader** à l'accueil.
+4. Lancez **L92 WebKit Autoloader** depuis l'accueil.
 
-## How to Use
+## Utilisation
 
-There are two ways to configure payloads:
+Deux façons de configurer les payloads :
 
-### 🟢 Option 1: Payload Manager
+### 🟢 Option 1 : Payload Manager
 
-If no `autoload.txt` config is found, the autoloader will automatically launch **[Payload Manager](https://github.com/itsPLK/ps5-payload-manager)** — a fully-featured PS5 payload manager with a web UI. This lets you configure and send payloads directly from your browser, without needing to manually set up config files or transfer ELF files ahead of time.
+Si aucun fichier `autoload.txt` n'est trouvé, l'autoloader lance automatiquement **[Payload Manager](https://github.com/itsPLK/ps5-payload-manager)** — un gestionnaire de payloads PS5 complet avec interface web. Cela permet d'envoyer et de configurer vos payloads directement depuis votre navigateur, sans fichier de configuration ni transfert manuel d'ELF.
 
-Just run the autoloader — if there's nothing configured, Payload Manager starts automatically.
+Lancez simplement l'autoloader — s'il n'y a rien de configuré, Payload Manager démarre automatiquement.
 
-> **Note:** Payload Manager also has its own built-in autoload feature, which lets you configure payloads to load automatically on startup — all managed through its web UI. This is separate from the `autoload.txt` mechanism described below.
+> **Remarque :** Payload Manager possède aussi son propre système d'autoload intégré, configurable via son interface web. Il est indépendant du mécanisme `autoload.txt` décrit ci-dessous.
 
 ---
 
-### ⚙️ Option 2: Manual Config (`autoload.txt`)
+### ⚙️ Option 2 : Configuration manuelle (`autoload.txt`)
 
-For a fixed, automated payload chain, you can configure payloads manually:
+Pour une chaîne de payloads fixe et automatisée :
 
-- Create a directory named `ps5_autoloader`.
-- Inside this directory, place your `.elf` / `.bin` files, and an `autoload.txt` file.
-  - In `autoload.txt`, list the files you want to load, one filename per line.
-  - Filenames are case-sensitive — ensure each name exactly matches the file.
-  - You can add lines like `!1000` to make the loader wait 1000 ms before sending the next payload.
-- Put the `ps5_autoloader` directory in one of these locations (priority order - highest first):
-  - Root of a USB drive
-  - Internal drive: `/data/ps5_autoloader`
+- Créez un dossier nommé `ps5_autoloader`.
+- Placez-y vos fichiers `.elf` / `.bin` ainsi qu'un fichier `autoload.txt`.
+  - Dans `autoload.txt`, listez les fichiers à charger, un nom par ligne.
+  - Les noms sont sensibles à la casse — assurez-vous qu'ils correspondent exactement.
+  - Vous pouvez ajouter des lignes comme `!1000` pour attendre 1000 ms avant d'envoyer le payload suivant.
+- Placez le dossier `ps5_autoloader` à l'un de ces emplacements (par priorité décroissante) :
+  - Racine d'une clé USB
+  - Disque interne : `/data/ps5_autoloader`
 
-> **Note:** When an `autoload.txt` config is found, Payload Manager is **not** launched automatically. If you also want Payload Manager available, place `pldmgr.elf` in your `ps5_autoloader` directory and add it to `autoload.txt`.
+> **Remarque :** lorsqu'un `autoload.txt` est trouvé, Payload Manager **n'est pas** lancé automatiquement. Si vous voulez aussi Payload Manager, placez `pldmgr.elf` dans votre dossier `ps5_autoloader` et ajoutez-le à `autoload.txt`.
 
-## Additional Info
+## Infos complémentaires
 
 <Details>
-<Summary><i>How to update the autoloader?</i></Summary>
+<Summary><i>Comment mettre à jour l'autoloader ?</i></Summary>
 
-The autoloader content is cached on the console, so updating is exactly the same as the initial install. Simply follow the **[Setup Instructions](#setup-instructions)** using the new release files. 
+Le contenu de l'autoloader est mis en cache sur la console : la mise à jour se fait exactement comme l'installation initiale. Suivez simplement les **[Instructions d'installation](#instructions-dinstallation)** avec les fichiers de la nouvelle version.
 
-The latest installer payload will re-create the homescreen app and refresh the cached page for you. Your payloads and `autoload.txt` on USB / internal storage are never touched.
+Le dernier payload d'installateur recrée l'application de l'accueil et rafraîchit la page en cache. Vos payloads et votre `autoload.txt` sur USB / stockage interne ne sont jamais touchés.
 </Details>
 
 <Details>
-<Summary><i>How to use a custom ELF Loader?</i></Summary>
+<Summary><i>Comment utiliser un ELF Loader personnalisé ?</i></Summary>
 
-On firmwares 7.00–13.60 (Relapse / Poops), the autoloader uses a custom version of **elfldr** that only accepts connections from the PS5 itself (localhost). This improves security by preventing unauthorized devices on your network from sending payloads to your console. On firmwares 1.00–5.50 (umtx2), the stock elfldr is booted.
+Sur firmwares 7.00–13.60 (Relapse / Poops), l'autoloader utilise une version personnalisée d'**elfldr** qui n'accepte les connexions que depuis la PS5 elle-même (localhost). Cela améliore la sécurité en empêchant tout appareil non autorisé de votre réseau d'envoyer des payloads à votre console. Sur firmwares 1.00–5.50 (umtx2), l'elfldr d'origine est démarré.
 
-If you want to use a "normal" ELF Loader that allows sending payloads from any device, you can simply load it through **Payload Manager**.
+Si vous souhaitez utiliser un ELF Loader « normal » acceptant les payloads de n'importe quel appareil, chargez-le simplement via **Payload Manager**.
 
-Alternatively, if you are using a manual config file (`autoload.txt`):
-1. Place your custom ELF Loader (e.g. `elfldr.elf`) in the `ps5_autoloader` directory.
-2. Add `elfldr.elf` to your `autoload.txt`.
-3. **Note**: If you are loading other payloads right after `elfldr.elf` in your `autoload.txt`, add a sleep command immediately after it (like `!4000` to sleep for 4 seconds) to give the new ELF Loader time to start up and listen before subsequent payloads are sent.
+Alternativement, avec un fichier de configuration (`autoload.txt`) :
+1. Placez votre ELF Loader personnalisé (ex. `elfldr.elf`) dans le dossier `ps5_autoloader`.
+2. Ajoutez `elfldr.elf` à votre `autoload.txt`.
+3. **Remarque** : si vous chargez d'autres payloads juste après `elfldr.elf` dans votre `autoload.txt`, ajoutez une commande de pause juste après (comme `!4000` pour 4 secondes) pour laisser le nouvel ELF Loader démarrer et écouter avant l'envoi des payloads suivants.
 
-Example `autoload.txt`:
+Exemple de `autoload.txt` :
 ```text
-# Load custom ELF Loader
+# Charger l'ELF Loader personnalisé
 elfldr.elf
-# Give it 4 seconds to start up (only needed if sending more payloads)
+# Lui laisser 4 secondes (uniquement si d'autres payloads suivent)
 !4000
-# Send other payloads
+# Envoyer les autres payloads
 etaHEN.elf
 ```
 </Details>
 
 ---
 
-## For developers
+## Pour les développeurs
 
-The technical internals and project architecture are documented in **[ARCHITECTURE.md](ARCHITECTURE.md)**.
+Les détails techniques et l'architecture du projet sont documentés dans **[ARCHITECTURE.md](ARCHITECTURE.md)**.
 
-## Credits
+## Crédits
 
-* **[idlesauce](https://github.com/idlesauce)** & contributors — [umtx2](https://github.com/idlesauce/umtx2)
-* **[jordyidk](https://github.com/jordyidk)** & contributors — [slopkit (Poops)](https://github.com/jordyidk/slopkit)
-* **[soniciso1](https://github.com/soniciso1)** — bringing down Poops support to lower firmwares (7.00–8.60)
-* **[ntfargo](https://github.com/ntfargo)** & contributors — [Relapse](https://github.com/ntfargo/Relapse-Exploit)
-* **[john-tornblom](https://github.com/john-tornblom)** — [ps5-payload-sdk](https://github.com/ps5-payload-dev/sdk/) and [elfldr](https://github.com/ps5-payload-dev/elfldr)
-* **[Mark Adler](https://github.com/madler)** — [puff.c](https://github.com/madler/zlib/tree/master/contrib/puff) (used to decompress embedded frontend files)
-* Everyone else contributing to the PS5 homebrew scene.
+* **L92** — interface française néon, rebranding et packaging de cette version
+* **[itsPLK](https://github.com/itsPLK)** — projet de base [ps5-webkit-autoloader](https://github.com/itsPLK/ps5-webkit-autoloader)
+* **[idlesauce](https://github.com/idlesauce)** & contributeurs — [umtx2](https://github.com/idlesauce/umtx2)
+* **[jordyidk](https://github.com/jordyidk)** & contributeurs — [slopkit (Poops)](https://github.com/jordyidk/slopkit)
+* **[soniciso1](https://github.com/soniciso1)** — support de Poops étendu aux firmwares plus anciens (7.00–8.60)
+* **[ntfargo](https://github.com/ntfargo)** & contributeurs — [Relapse](https://github.com/ntfargo/Relapse-Exploit)
+* **[john-tornblom](https://github.com/john-tornblom)** — [ps5-payload-sdk](https://github.com/ps5-payload-dev/sdk/) et [elfldr](https://github.com/ps5-payload-dev/elfldr)
+* **[Mark Adler](https://github.com/madler)** — [puff.c](https://github.com/madler/zlib/tree/master/contrib/puff) (décompression des fichiers frontend embarqués)
+* Tous les autres contributeurs de la scène homebrew PS5.
 
+## Avertissement
 
-## Disclaimer
+Cet outil est fourni tel quel, à des fins de recherche et de développement uniquement. Utilisez-le à vos propres risques. Les développeurs ne sont pas responsables de tout dommage, perte de données ou conséquences résultant de l'utilisation de ce logiciel.
 
-This tool is provided as-is for research and development purposes only. Use at your own risk. The developers are not responsible for any damage, data loss, or consequences resulting from the use of this software.
+## Licence
 
-## License
-
-This project is licensed under the GPL-3.0 License.
-
-## Donate
-- [donate to PLK](DONATE.md)
+Ce projet est sous licence GPL-3.0 (comme le projet original de itsPLK).

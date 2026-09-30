@@ -5,6 +5,7 @@
   var logContainer = document.getElementById('logContainer');
   var progressBar = document.getElementById('progressBar');
   var progressLabel = document.getElementById('progressLabel');
+  var progressPctEl = document.getElementById('progressPct');
   var exploitEl = document.getElementById('exploit');
 
   /* After a WebProcess crash the PS5 browser restores this page together with
@@ -82,12 +83,31 @@
     return entry;
   }
 
+  /* SVG ring circumference: 2 * PI * r(88) = 552.9. Keep in sync with
+     style.css (.ring-fill stroke-dasharray). offset 0 = full ring. */
+  var RING_CIRC = 552.9;
+
   function updateProgress(percent, message) {
     progressPercent = percent;
-    progressBar.style.width = percent + '%';
+    /* Ring is an SVG circle: drive stroke-dashoffset (0 = full ring). */
+    var offset = (RING_CIRC * (1 - percent / 100)).toFixed(1);
+    if (progressBar.__offset !== offset) {
+      progressBar.__offset = offset;
+      progressBar.style.strokeDashoffset = offset;
+      try { progressBar.style.setProperty('stroke-dashoffset', offset); } catch (eRing) { }
+    }
+    if (progressPctEl) {
+      var pctText = Math.round(percent) + '%';
+      if (progressPctEl.textContent !== pctText) progressPctEl.textContent = pctText;
+    }
     if (message) {
       progressLabel.textContent = message;
       uiLog(message, 'info');
+    }
+    if (percent >= 100) {
+      try { document.body.classList.add('done'); } catch (eDone) { }
+    } else if (percent === 0 && message && /échec|failed|erreur/i.test(message)) {
+      try { document.body.classList.add('fail'); } catch (eFail) { }
     }
   }
 
@@ -120,7 +140,7 @@
       return EXPLOIT_MODE;
     }
     if (!fw) {
-      uiLog('[ERROR] Not a PlayStation 5 browser.', 'error');
+      uiLog('[ERROR] Ce navigateur n\'est pas celui d\'une PlayStation 5.', 'error');
       return null;
     }
     if (UMTX2_FIRMWARES.indexOf(fw.str) !== -1) return 'umtx2';
@@ -151,8 +171,9 @@
     if (hasRelapse) return 'relapse';
     if (hasPoops) return 'poops';
 
-    uiLog('[ERROR] Unsupported firmware ' + fw.str +
-      ' (supported: 1.00-5.50 via umtx2, 7.00-12.00 via poops/relapse, 12.02-13.60 via relapse).', 'error');
+    uiLog('[ERROR] Firmware non supporté : ' + fw.str +
+      ' (supportés : 1.00-5.50 via umtx2, 7.00-12.00 via poops/relapse, 12.02-13.60 via relapse).', 'error');
+
     return null;
   }
 
@@ -173,6 +194,10 @@
       mirrorConsole(exploitMode);
     }
     finished = true;
+    try {
+      document.body.classList.remove('fail');
+      document.body.classList.add(data.ok ? 'done' : 'fail');
+    } catch (eCls) { }
 
     /* Success is terminal — stop mirroring so the page stays idle while the
        payload runs alongside it. On failure keep streaming the iframe's
@@ -182,8 +207,8 @@
       mirrorTimer = 0;
     }
     if (data.ok) {
-      uiLog('Payload loaded (' + data.bytes + ' bytes sent to elfldr).', 'success');
-      updateProgress(100, 'Autoload finished.');
+      uiLog('Payload chargé (' + data.bytes + ' octets envoyés à elfldr).', 'success');
+      updateProgress(100, 'Autoload terminé — le navigateur va se fermer automatiquement.');
 
       /* Payload is running as its own process now — unload the iframe to
          free the memory it held and avoid a browser OOM dialog.
@@ -194,12 +219,12 @@
         try { exploitEl.src = 'about:blank'; } catch (e) { }
       }
     } else {
-      uiLog('[ERROR] Autoload failed: ' + (data.why || 'unknown error'), 'error');
-      updateProgress(0, 'Autoload failed.');
+      uiLog('[ERROR] Échec de l\'autoload : ' + (data.why || 'erreur inconnue'), 'error');
+      updateProgress(0, 'Autoload échoué — redémarre ta console et relance.');
     }
     setTimeout(function () {
       if (data.ok) {
-        uiLog('Payload running on the console.', 'success');
+        uiLog('Payload en cours d\'exécution sur la console.', 'success');
       }
     }, 1500);
   }
@@ -283,8 +308,8 @@
          rather than recover from it — the user reloads instead. */
       if (doc.readyState === 'complete' && mirrorConsole.warned !== frameUrl) {
         mirrorConsole.warned = frameUrl;
-        uiLog('[iframe] no exploit log at "' + (frameUrl || 'about:blank')
-          + '" — the chain may not have started. Reload the page to retry.',
+        uiLog('[iframe] aucun log d\'exploit sur "' + (frameUrl || 'about:blank')
+          + '" — la chaîne n\'a peut-être pas démarré. Recharge la page pour réessayer.',
           'warning');
       }
       return;
@@ -459,8 +484,9 @@
   }
 
   function start() {
-    uiLog('WebKit Autoloader by PLK', 'success');
-    updateProgress(0, 'Waiting to start...');
+    uiLog('L92 WebKit Autoloader — par L92', 'success');
+    uiLog('Chaînes : umtx2 (1.00-5.50) · poops (7.00-12.00) · relapse (7.00-13.60)', 'info');
+    updateProgress(0, 'Démarrage…');
 
     window.addEventListener('message', function (event) {
       var data = event.data;
@@ -481,9 +507,15 @@
 
     var picked = pickExploit();
     if (!picked) {
-      updateProgress(0, 'Unsupported firmware.');
+      updateProgress(0, 'Firmware non supporté.');
+      try { document.body.classList.add('fail'); } catch (eCls) { }
       return;
     }
+    uiLog('Chaîne sélectionnée : ' + (picked === 'umtx2'
+      ? 'umtx2 (kernel 1.00-5.50)'
+      : picked === 'poops'
+        ? 'poops (kernel 7.00-12.00)'
+        : 'relapse (kernel 7.00-13.60)'), 'success');
     exploitMode = picked;
     var exploitUrl = picked === 'umtx2' ? UMTX2_URL
       : picked === 'poops' ? POOPS_URL

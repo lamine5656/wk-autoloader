@@ -89,7 +89,7 @@ int main(void) {
         sleep(1);
     }
 
-    wkali_log("[WKALI] WebKit Autoloader Installer v%s by PLK (built %s) starting on port %d...\n",
+    wkali_log("[WKALI] L92 WebKit Autoloader Installer v%s by L92 (built %s) starting on port %d...\n",
                    WKAL_FULL_VERSION, WKAL_BUILD_TIME, WKALI_PORT);
 
     /* Initialize PS5 System Services */
@@ -123,7 +123,7 @@ int main(void) {
 
     if (NULL == daemon) {
         wkali_log("[WKALI] Failed to start HTTP daemon!\n");
-        wkali_notify("WebKit Autoloader Installer: Error\nHTTP server failed to start");
+        wkali_notify("L92 WebKit Autoloader : Erreur\nÉchec du démarrage du serveur HTTP");
         return 1;
     }
 
@@ -173,7 +173,7 @@ int main(void) {
     }
 
     if (atomic_load(&install_completed)) {
-        wkali_notify("WebKit Autoloader v%s cached successfully!", WKAL_FULL_VERSION);
+        wkali_notify("L92 WebKit Autoloader v%s : mise en cache réussie !", WKAL_FULL_VERSION);
     }
     wkali_log_wakeup();
 
