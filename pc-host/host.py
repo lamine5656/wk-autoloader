@@ -100,7 +100,7 @@ def build_banner():
             "   ┌" + "─" * width + "┐",
             row("PS5-WEBKIT-AUTOLOADER"),
             row(f"INSTALLER-HOST v{VERSION}"),
-            row(f"by PLK (built {BUILD_TIME})"),
+            row(f"by L92 (built {BUILD_TIME})"),
             "   └" + "─" * width + "┘",
         ]
     )
@@ -116,7 +116,7 @@ def build_credits():
             "",
             "   ┌" + "─" * width + "┐",
             row("THIS PROJECT IS FREE & OPEN SOURCE"),
-            row("github.com/itsPLK/ps5-webkit-autoloader"),
+            row("github.com/lamine5656/wk-autoloader"),
             "   └" + "─" * width + "┘",
         ]
     )
@@ -145,8 +145,8 @@ class UpdateChecker:
     screen. All failures are silent — the notice is best-effort only.
     """
 
-    API_URL = "https://api.github.com/repos/itsPLK/ps5-webkit-autoloader/releases/latest"
-    RELEASES_URL = "https://github.com/itsPLK/ps5-webkit-autoloader/releases"
+    API_URL = "https://api.github.com/repos/lamine5656/wk-autoloader/releases/latest"
+    RELEASES_URL = "https://github.com/lamine5656/wk-autoloader/releases"
     USER_AGENT = "ps5-webkit-autoloader-host"
     TIMEOUT = 3
 

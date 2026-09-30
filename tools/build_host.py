@@ -259,7 +259,7 @@ def main(argv=None):
 
     print(f"Embedded {len(file_map)} files (merged from {frontend_dir} and {overrides_dir})")
     print(f"  raw files:  {raw_size} bytes -> zip: {len(zip_data)} bytes -> base64: {len(payload_b64)} bytes")
-    print(f"  version:    v{version} by PLK (built {build_time})")
+    print(f"  version:    v{version} by L92 (built {build_time})")
     print(f"Wrote {output_path} ({len(built)} bytes)")
     return 0
 

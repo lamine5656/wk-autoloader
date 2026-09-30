@@ -4,7 +4,7 @@ A persistent entry point for PS5 payloads that runs a WebKit/kernel exploit chai
 and autoloads your payloads fully offline. Three exploit chains are bundled and
 selected by firmware:
 
-- **umtx2** (FW 1.00–5.50) — idlesauce umtx2 chain (`umtx2/`). Fully offline.
+- **umtx2** (FW 1.00–5.50) — umtx2 chain (`umtx2/`). Fully offline.
 - **poops** (FW 7.00–12.00) — slopkit poops chain (`slopkit/slopkit/poops.html`). Fully offline.
 - **relapse** (FW 7.00–13.60) — relapse chain (`relapse/`). Requires an active network interface.
 
@@ -209,7 +209,7 @@ re-run the script, and regenerate `patches/umtx2-autoload.patch` if it no longer
 
 relapse (FW 7.00–13.60) boots the **shared** elfldr, served at `/app/<version>/shared/elfldr-ps5.elf`
 (staged from `frontend/autoloader/shared/`). `tools/download_deps.sh` fetches it from the pinned
-`itsPLK/ps5-elfldr` release (tag `ELFLDR_TAG`), sha256-verifies it, and caches the digest in a
+elfldr release (tag `ELFLDR_TAG`), sha256-verifies it, and caches the digest in a
 `.sha256` sidecar so offline rebuilds work. umtx2 (FW 1.00–5.50) boots its **own** elfldr from
 the umtx2 submodule instead, matching stock umtx2 behavior.
 
