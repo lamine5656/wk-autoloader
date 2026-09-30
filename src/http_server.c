@@ -20,7 +20,7 @@
 
 /* CORS is intentionally `*`: the installer page is also served from the PC
  * host (manuals.playstation.net over HTTPS), which cross-origin XHRs this
- * on-console server (http://127.0.0.1:18181) for /version and
+ * on-console server (http://127.0.0.1:18182) for /version and
  * /install. The server binds 127.0.0.1 only and lives for seconds.
  * Do not restrict unless that flow changes. */
 #define CORS_ORIGIN "*"

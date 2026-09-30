@@ -12,7 +12,7 @@ On firmwares supported by both chains (7.00–12.00), the installer page asks th
 before caching which chain to install: Poops (for fully offline support) or Relapse
 (newer chain; requires active Wi-Fi/Ethernet network interface).
 
-All chains converge on the same result: a `WKAL00001` homescreen app that runs the
+All chains converge on the same result: a `L92WKAL01` homescreen app that runs the
 exploit, boots elfldr, and autoloads your payload through it.
 
 ## Repository layout
@@ -34,7 +34,7 @@ exploit, boots elfldr, and autoloads your payload through it.
 
 **Installer ELF (already jailbroken).** Send `webkit-autoloader-installer_v*.elf` to the console
 (elfldr or Payload Manager). It opens the browser once to cache the frontend via AppCache,
-creates the `WKAL00001` app only after that cache succeeds, then exits. From then on the app
+creates the `L92WKAL01` app only after that cache succeeds, then exits. From then on the app
 runs the chain offline from the cache. On FW 7.00–12.00, it prompts the user to pick Poops or
 Relapse before starting the cache.
 
@@ -70,19 +70,19 @@ instead of the unified-autoloader — so this flow installs the homescreen app.
 
 ## Native installer (`src/`)
 
-A PS5 payload running a `libmicrohttpd` server on port **18181**:
+A PS5 payload running a `libmicrohttpd` server on port **18182**:
 
 1. Serves the staged frontend: installer-page at `/`, the pointer at `/app/index.html`
    and the versioned autoloader at `/app/<version>/`.
 2. Frontend files are embedded **compressed** (raw DEFLATE via `src/inflate.c`, the vendored
    puff) and inflated on demand.
 3. The browser caches everything through `cache.appcache`, then hits `/install`. The ELF
-   installs/updates the `WKAL00001` homescreen app and shuts down only after the cache is
+   installs/updates the `L92WKAL01` homescreen app and shuts down only after the cache is
    confirmed complete. If the user closes the browser mid-load, no `/install` is ever hit,
    so no shortcut is created/updated and the previously-installed version stays untouched (the
    installer process simply keeps running until a subsequent run kills it). The master URL
    carries `?v=<version>` so stale cached entries are avoided.
-4. The app's `deeplinkUri` is the stable pointer `http://127.0.0.1:18181/app/index.html`.
+4. The app's `deeplinkUri` is the stable pointer `http://127.0.0.1:18182/app/index.html`.
 
 ### Cache layout and partial-cache protection
 
