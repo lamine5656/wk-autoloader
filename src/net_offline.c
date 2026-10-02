@@ -38,7 +38,7 @@
 #define WKALI_OFFLINE_MASK 255, 255, 255, 0
 
 /* Candidate interface names, most likely first (PS5 is FreeBSD-based:
- * eth*/wlan* are the usual Sony names, the rest are generic driver names).
+ * eth0/wlan0 are the usual Sony names, the rest are generic driver names).
  * A name without a driver simply fails SIOCGIFFLAGS (ENXIO) and is skipped. */
 static const char *const wk_if_candidates[] = {
     "eth0", "eth1", "wlan0", "wlan1",
