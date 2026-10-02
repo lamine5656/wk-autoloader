@@ -186,6 +186,33 @@
     }, 480);
   }
 
+  /* Switch the autoload chain to poops. poops is 100% offline for FW 7.00-12.00
+     and already the installer default on dual firmwares, so it does not need
+     any interface address: this is the reliable fallback when relapse dies at
+     the KASLR leak with 'routing socket rejected'. */
+  function pivotToPoops() {
+    if (exploitMode === 'poops') return;
+    if (window.__relapseFailed) window.__relapseFailed = false;
+    try { sessionStorage.removeItem('on_load_autorun'); } catch (e) { }
+    try { sessionStorage.removeItem('wkal_autoload'); } catch (e) { }
+    try { sessionStorage.removeItem('slopkit-poops:next'); } catch (e) { }
+    try { sessionStorage.removeItem('slopkit-poops:latch'); } catch (e) { }
+    clearSlopkitState();
+    clearInterval(mirrorTimer);
+    mirrorTimer = 0;
+    exploitMode = 'poops';
+    uiLog('Pivot vers poops : chaîne sélectionnée poops (7.00-12.00, 100% offline).', 'success');
+    updateProgress(5);
+    chainStarted = true;
+    mirrorTimer = setInterval(mirrorSlopkit, 500);
+    try {
+      exploitEl.src = POOPS_URL;
+      revealExploit();
+    } catch (e) {
+      uiLog('[L92] pivotToPoops échec : ' + (e && e.message ? e.message : e), 'error');
+    }
+  }
+
   function onAutoloadResult(data) {
     if (finished) return;
     if (exploitMode === 'poops') {
@@ -331,6 +358,22 @@
       consoleMirror.lastText = text;
       mirroredAny = true;
       if (prefix === 'relapse' && severity !== 'error') advanceRelapseProgress(text);
+      /* Relapse KASLR stun: the kernel's AF_ROUTE socket rejects the RTM_GET
+         (the same error shown in the screenshot, and the loopback fallback in
+         net_offline.c only affects the JS/loopback path). With only a synthetic
+         interface address the leak aborts and relapse never reaches the payload.
+         Fall back to poops: 100% offline for 7.00-12.00 and already the default
+         on dual firmwares, so no interface is needed. */
+      if (prefix === 'relapse' && /routing socket rejected/i.test(text)
+        && exploitMode === 'relapse') {
+        if (!window.__relapseFailed) {
+          window.__relapseFailed = true;
+          uiLog('[L92] Aucun câble/Wi-Fi : la chaîne relapse vient de se bloquer au KASLR ('
+            + (text || 'routing socket rejected') + '). Le repli poops est activé : 100% offline ' +
+            'et déjà le choix par défaut sur 7.00-12.00.', 'error');
+          pivotToPoops();
+        }
+      }
       /* Neither chain has a separate stage/progress element, so surface the
          newest non-error line as the progress label — that is the only
          "what is it doing right now" signal the exploit gives us. */
