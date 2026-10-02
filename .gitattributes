@@ -1,0 +1,5 @@
+# Patch files must keep their exact bytes: slopkit/umtx2 upstream files are
+# CRLF, relapse files are LF. The patches must match their targets' line
+# endings for `git apply` (see tools/apply_*_patch.sh), and core.autocrlf on
+# Windows must never rewrite them on add/checkout.
+patches/*.patch -text
