@@ -165,7 +165,7 @@
       }
       if (stored === 'relapse') return 'relapse';
       if (stored === 'poops') return 'poops';
-      return 'relapse'; // default to relapse on dual firmwares
+      return 'poops'; // default to poops on dual firmwares: 100% offline (no interface needed) and fast
     }
 
     if (hasRelapse) return 'relapse';
@@ -219,7 +219,7 @@
         try { exploitEl.src = 'about:blank'; } catch (e) { }
       }
     } else {
-      uiLog('[ERROR] Échec de l\'autoload : ' + (data.why || 'erreur inconnue'), 'error');
+      uiLog('[ERROR] Échec de l\'autoload : ' + (data.why || 'erreur inconnue').replace(/no interface has an address/i, 'aucune interface réseau adressée — branche un câble Ethernet ou active le Wi-Fi (internet inutile), puis relance'), 'error');
       updateProgress(0, 'Autoload échoué — redémarre ta console et relance.');
     }
     setTimeout(function () {

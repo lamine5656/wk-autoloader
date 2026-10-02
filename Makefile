@@ -17,7 +17,7 @@ LIBS     := $(TARGET)/lib/libmicrohttpd.a \
 # Source Files
 SRCS := src/main.c src/http_server.c src/app_installer.c \
         src/notification.c src/ps5_launcher.c src/log.c src/inflate.c \
-        src/webkit_cleaner.c src/simulate_corrupt.c
+        src/webkit_cleaner.c src/simulate_corrupt.c src/net_offline.c
 ELF := installer.elf
 
 # Generated file registry

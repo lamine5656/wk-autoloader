@@ -74,6 +74,14 @@ else
     exit 1
 fi
 
+# 4b. Offline KASLR fallback: relapse's routing-socket leak aborts when no
+#     interface has an IPv4 address (Wi-Fi off, no cable). The payload side
+#     normally configures a synthetic interface first (src/net_offline.c);
+#     this adds a loopback fallback for when that was not possible.
+python3 "$ROOT/tools/patch_relapse_offline.py" "$DEST"
+git -C "$DEST" add -A
+git -C "$DEST" commit -q -m "Apply offline KASLR fallback" || true
+
 # 5. Sanity check: the patched sources must carry our integration markers, the
 #    bundled elfldr and kexp must be gone, the runtime offsets URL must
 #    be the pinned one, and kexp must run via KXP2 without binary patching.
@@ -85,6 +93,7 @@ if ! grep -q 'const AUTOLOAD = new URLSearchParams' src/main.js \
     || ! grep -q 'isElfldrListening(p, chain)' src/main.js \
     || ! grep -q 'const why = "Already jailbroken.";' src/main.js \
     || ! grep -q 'window.fw_str + ".js");' src/main.js \
+    || ! grep -q 'offline fallback: lo0 always has a route' src/relapse_exploit.js \
     || grep -qF 'fw_str}.js?v=' src/main.js \
     || ! grep -q 'const SHARED_BASE = "../shared/";' src/kexp.js \
     || ! grep -q 'const DEFAULT_ELFLDR = "elfldr-ps5.elf";' src/kexp.js \
@@ -108,7 +117,8 @@ if ! grep -q 'const AUTOLOAD = new URLSearchParams' src/main.js \
     exit 1
 fi
 echo "relapse: patch verification OK (early elfldr guard, ?autoload sender,"
-echo "         shared elfldr and kexp with KXP2 api-table, query-less offsets URL)."
+echo "         shared elfldr and kexp with KXP2 api-table, query-less offsets URL,"
+echo "         offline KASLR fallback)."
 
 # 6. Parse-check the patched JS in the mode the browser will use it in. A
 #    `node --check foo.js` parses in CommonJS (sloppy) mode, but these are ES

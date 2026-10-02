@@ -107,6 +107,11 @@ int main(void) {
         wkali_log("[WKALI] sceUserServiceInitialize failed: 0x%08X\n", err);
     }
 
+    /* Guarantee at least one interface has an IPv4 address before the browser
+     * opens: the Relapse chain's KASLR leak needs one even though nothing is
+     * ever sent over the network (works with Wi-Fi off, no cable connected). */
+    wkali_ensure_interface_address();
+
     /* The homescreen app is installed/updated only AFTER the browser has
      * finished caching (via the /install route), so a shortcut is never
      * created for a partial cache. Nothing app-related happens at startup. */

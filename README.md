@@ -17,11 +17,7 @@ Les exploits WebKit sont généralement chargés en pointant le DNS de votre PS5
 Cet autoloader fait différemment :
 
 - **100 % hors ligne, aucun DNS tiers.** Après une installation unique depuis votre PC, tout est servi directement depuis votre PS5. Rien d'externe ne peut tomber en panne ou changer dans votre dos.
-- **Configuration unique, puis raccourci sur l'accueil.** Une fois installé, vous n'avez plus besoin de PC ni de réseau — lancez simplement **L92 WebKit Autoloader** depuis l'accueil et c'est parti.
-- **Payloads chargés comme vous en avez l'habitude.** Après l'exécution de la chaîne d'exploits, vos payloads sont envoyés via **Payload Manager**, ou via un fichier `autoload.txt` personnalisé.
-
-- **100 % hors ligne (Poops), aucun DNS tiers.** Après une installation unique depuis votre PC, tout est servi directement depuis votre PS5. Rien d'externe ne peut tomber en panne ou changer dans votre dos.  
-  Poops fonctionne **entièrement hors ligne**. Relapse (firmwares 12.02–13.60) nécessite une interface réseau active (Wi-Fi ou Ethernet reliés à un réseau local ; l'accès à Internet n'est pas requis).
+- **Jailbreak sans aucune connexion.** **Poops** (7.00–12.00, chaîne par défaut) est 100 % hors ligne. **Relapse** (jusqu'à 13.60) fonctionne lui aussi **Wi-Fi éteint et câble débranché** : l'autoloader configure automatiquement une interface réseau interne (et le repli loopback) pour sa fuite KASLR — aucun paquet ne quitte la console.
 - **Configuration unique, puis raccourci sur l'accueil.** Une fois installé, vous n'avez plus besoin de PC ni de réseau — lancez simplement **L92 WebKit Autoloader** depuis l'accueil et c'est parti.
 - **Payloads chargés comme vous en avez l'habitude.** Après l'exécution de la chaîne d'exploits, vos payloads sont envoyés via **Payload Manager**, ou via un fichier `autoload.txt` personnalisé.
 
