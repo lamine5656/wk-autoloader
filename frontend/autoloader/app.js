@@ -188,10 +188,19 @@
 
   /* Switch the autoload chain to poops. poops is 100% offline for FW 7.00-12.00
      and already the installer default on dual firmwares, so it does not need
-     any interface address: this is the reliable fallback when relapse dies at
-     the KASLR leak with 'routing socket rejected'. */
+     any interface address: this is the last-resort fallback when relapse dies
+     at the KASLR leak with 'routing socket rejected' (the payload now installs
+     simulated routes and the relapse copy retries via loopback, so this
+     should rarely fire). Guarded on the firmware table: poops only exists on
+     7.00-12.00 — on 12.02-13.60 relapse is the only kernel chain available. */
   function pivotToPoops() {
     if (exploitMode === 'poops') return;
+    var fw = detectFirmware();
+    if (!fw || POOPS_FIRMWARES.indexOf(fw.str) === -1) {
+      uiLog('[L92] Repli poops impossible sur le firmware ' + (fw ? fw.str : 'inconnu')
+        + ' — poops supporte 7.00-12.00 uniquement. Relance avec un câble ou le Wi-Fi activé.', 'error');
+      return;
+    }
     if (window.__relapseFailed) window.__relapseFailed = false;
     try { sessionStorage.removeItem('on_load_autorun'); } catch (e) { }
     try { sessionStorage.removeItem('wkal_autoload'); } catch (e) { }
