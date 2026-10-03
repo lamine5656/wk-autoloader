@@ -53,7 +53,7 @@ WKAL_HOST := webkit-autoloader-host.py
 WKAL_HOST_SOURCES := pc-host/host.py $(FRONTEND_FILES)
 
 # Compiler Flags
-CFLAGS  := -Os -Wall -ffunction-sections -fdata-sections $(INCLUDES)
+CFLAGS  := -O2 -Wall -ffunction-sections -fdata-sections $(INCLUDES)
 LDFLAGS := -Wl,--gc-sections
 
 # Test builds that simulate a corrupted WebKit AppCache (see tools/build_cache_corruption_test_elfs.sh):

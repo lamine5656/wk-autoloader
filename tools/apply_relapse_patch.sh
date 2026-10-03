@@ -94,6 +94,8 @@ if ! grep -q 'const AUTOLOAD = new URLSearchParams' src/main.js \
     || ! grep -q 'const why = "Already jailbroken.";' src/main.js \
     || ! grep -q 'window.fw_str + ".js");' src/main.js \
     || ! grep -q 'offline fallback: lo0 always has a route' src/relapse_exploit.js \
+    || ! grep -q 'L92 speed: poll AIO completion 6x more often' src/relapse_exploit.js \
+    || ! grep -q 'L92 speed: poll sooner' src/relapse_exploit.js \
     || grep -qF 'fw_str}.js?v=' src/main.js \
     || ! grep -q 'const SHARED_BASE = "../shared/";' src/kexp.js \
     || ! grep -q 'const DEFAULT_ELFLDR = "elfldr-ps5.elf";' src/kexp.js \

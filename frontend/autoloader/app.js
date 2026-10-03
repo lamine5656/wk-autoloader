@@ -183,7 +183,7 @@
     setTimeout(function () {
       splashEl.hidden = true;
       requestAnimationFrame(scrollLogToBottom);
-    }, 480);
+    }, 240);
   }
 
   /* Switch the autoload chain to poops. poops is 100% offline for FW 7.00-12.00
@@ -213,7 +213,7 @@
     uiLog('Pivot vers poops : chaîne sélectionnée poops (7.00-12.00, 100% offline).', 'success');
     updateProgress(5);
     chainStarted = true;
-    mirrorTimer = setInterval(mirrorSlopkit, 500);
+    mirrorTimer = setInterval(mirrorSlopkit, 100);
     try {
       exploitEl.src = POOPS_URL;
       revealExploit();
@@ -578,10 +578,10 @@
     updateProgress(5);
 
     if (picked === 'poops') {
-      mirrorTimer = setInterval(mirrorSlopkit, 500);
+      mirrorTimer = setInterval(mirrorSlopkit, 100);
       clearSlopkitState();
     } else {
-      mirrorTimer = setInterval(function () { mirrorConsole(exploitMode); }, 500);
+      mirrorTimer = setInterval(function () { mirrorConsole(exploitMode); }, 100);
     }
 
     /* umtx2 auto-runs its chain on load when sessionStorage 'on_load_autorun'
@@ -602,9 +602,9 @@
       exploitEl.src = exploitUrl;
     } catch (e) { }
 
-    /* Révélation accélérée (0.6s vs 1.5s upstream) : l'iframe est déjà
+    /* Révélation accélérée (0.3s vs 1.5s upstream) : l'iframe est déjà
        armée ci-dessus, la splash ne fait que masquer le log. */
-    setTimeout(revealExploit, 600);
+    setTimeout(revealExploit, 300);
   }
 
 

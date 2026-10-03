@@ -120,7 +120,7 @@ int main(void) {
     signal(SIGTERM, SIG_IGN);
 
     /* Start the MHD daemon using a thread pool to handle concurrent AppCache requests. */
-    daemon = MHD_start_daemon(MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_DEBUG,
+    daemon = MHD_start_daemon(MHD_USE_INTERNAL_POLLING_THREAD,
                               WKALI_PORT, NULL, NULL, &http_on_request,
                               NULL, 
                               MHD_OPTION_THREAD_POOL_SIZE, (unsigned int)8,

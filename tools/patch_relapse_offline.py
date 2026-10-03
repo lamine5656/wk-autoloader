@@ -18,8 +18,11 @@ The payload side (src/net_offline.c) now also installs simulated routes
 (subnet + default via 10.77.0.2) so the first attempt usually succeeds; this
 patch is the safety net that keeps relapse working either way.
 
-Idempotent: exits 0 when the fallback is already present, 1 when the
+Idempotent: exits 0 when the patches are already present, 1 when the
 upstream code changed and could not be patched.
+
+Patches 3-4 (L92 speed): tighten relapse's AIO polling sleeps so the
+payload transfer and spray-wait loops react faster (see REPLACEMENTS).
 """
 import pathlib
 import sys
@@ -59,6 +62,21 @@ REPLACEMENTS = [
     if (wrote < 0)
       throw new Error("kaslr: routing socket rejected the request");""",
     ),
+    (
+        # L92 speed: the AIO send loop polls completion every 60 ms; on a
+        # localhost-speed socket most of that is pure sleep between chunks.
+        # Poll 6x more often so the payload transfer finishes sooner.
+        """      await sleep(60);
+      await this.sysInt(SYS_AIO_MULTI_POLL, ids, sent, states);""",
+        """      await sleep(10); // L92 speed: poll AIO completion 6x more often
+      await this.sysInt(SYS_AIO_MULTI_POLL, ids, sent, states);""",
+    ),
+    (
+        # L92 speed: the spray-wait loop only sleeps between AIO completion
+        # checks; 5 ms granularity picks up completions 4x sooner.
+        """      if (pendingIndices.length < wantedCount) await sleep(20);""",
+        """      if (pendingIndices.length < wantedCount) await sleep(5); // L92 speed: poll sooner""",
+    ),
 ]
 
 
@@ -79,7 +97,7 @@ def main() -> int:
                   file=sys.stderr)
             return 1
     target.write_text(text, encoding="utf-8", newline="\n")
-    print("relapse: offline KASLR fallback (loopback route retry) applied.")
+    print("relapse: offline KASLR fallback (loopback route retry) + L92 speed patches applied.")
     return 0
 
 

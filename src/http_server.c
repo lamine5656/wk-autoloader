@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdatomic.h>
+#include <pthread.h>
 #include <microhttpd.h>
 
 #include "wkali.h"
@@ -48,6 +49,97 @@ static const FileEntry *registry_lookup(const char *url) {
     if (strcmp(url, ROUTE_INDEX) == 0)
         return file_registry_find(ROUTE_INDEX_HTML);
     return file_registry_find(url);
+}
+
+/* ── Inflated-entry cache ──────────────────────────────────────────────
+ * puff (src/inflate.c, vendored) inflates byte-at-a-time and is slow:
+ * re-inflating the large registry entries on every request added visible
+ * latency to first load (AppCache downloads everything) and to every
+ * repair/retry pass. MHD serves requests from a thread pool, so the
+ * cache is guarded by a mutex; the inflate itself runs outside the lock
+ * so parallel first downloads of different files still overlap. Only
+ * entries >= WKALI_CACHE_MIN_SIZE are cached (small ones inflate in
+ * microseconds) and the total is capped to keep installer-process memory
+ * bounded; anything not cached takes the per-request inflate path.
+ * Cached buffers are shared and must never be freed by the request
+ * handler — every downstream mutation (manifest filter, prompt-page
+ * copy, test hook) already copies first and only frees MUST_FREE
+ * buffers. */
+#define WKALI_CACHE_MIN_SIZE (64u * 1024u)
+#define WKALI_CACHE_MAX_BYTES (12u * 1024u * 1024u)
+#define WKALI_CACHE_MAX_ENTRIES 16
+
+static pthread_mutex_t infl_cache_lock = PTHREAD_MUTEX_INITIALIZER;
+static const FileEntry *infl_cache_entries[WKALI_CACHE_MAX_ENTRIES];
+static unsigned char *infl_cache_bufs[WKALI_CACHE_MAX_ENTRIES];
+static size_t infl_cache_count;
+static size_t infl_cache_bytes;
+
+/* Returns the shared inflated buffer for a registry entry, inflating and
+ * caching it on first use. Returns NULL when the entry is not worth
+ * caching (small), the cache budget is exhausted, or inflate failed —
+ * the caller then takes the per-request inflate path. */
+static unsigned char *inflated_for(const FileEntry *entry) {
+    unsigned char *buf = NULL;
+    size_t i;
+    int eligible;
+
+    pthread_mutex_lock(&infl_cache_lock);
+    for (i = 0; i < infl_cache_count; i++) {
+        if (infl_cache_entries[i] == entry) {
+            pthread_mutex_unlock(&infl_cache_lock);
+            return infl_cache_bufs[i];
+        }
+    }
+    eligible = (entry->orig_size >= WKALI_CACHE_MIN_SIZE &&
+                infl_cache_count < WKALI_CACHE_MAX_ENTRIES &&
+                infl_cache_bytes + entry->orig_size <= WKALI_CACHE_MAX_BYTES);
+    pthread_mutex_unlock(&infl_cache_lock);
+
+    if (!eligible)
+        return NULL;
+
+    {
+        unsigned char *fresh = malloc(entry->orig_size + 1);
+        unsigned long destlen = entry->orig_size;
+        unsigned long sourcelen = entry->size;
+
+        if (!fresh)
+            return NULL;
+        if (puff(fresh, &destlen, entry->data, &sourcelen) != 0) {
+            free(fresh);
+            return NULL;
+        }
+        fresh[destlen] = '\0';
+
+        pthread_mutex_lock(&infl_cache_lock);
+        /* Another connection may have stored this entry while we inflated. */
+        for (i = 0; i < infl_cache_count; i++) {
+            if (infl_cache_entries[i] == entry) {
+                buf = infl_cache_bufs[i];
+                break;
+            }
+        }
+        if (!buf && infl_cache_count < WKALI_CACHE_MAX_ENTRIES &&
+            infl_cache_bytes + entry->orig_size <= WKALI_CACHE_MAX_BYTES) {
+            infl_cache_entries[infl_cache_count] = entry;
+            infl_cache_bufs[infl_cache_count] = fresh;
+            infl_cache_count++;
+            infl_cache_bytes += entry->orig_size;
+            wkali_log("[WKALI] inflate cache: +%u bytes (%u total)\n",
+                      (unsigned)entry->orig_size, (unsigned)infl_cache_bytes);
+            buf = fresh;
+            fresh = NULL;
+        }
+        pthread_mutex_unlock(&infl_cache_lock);
+
+        if (fresh) {
+            /* Cache full (or raced): let the caller inflate per request. */
+            free(fresh);
+            return NULL;
+        }
+        return buf;
+    }
 }
 
 enum MHD_Result http_on_request(void *cls, struct MHD_Connection *conn,
@@ -211,6 +303,17 @@ enum MHD_Result http_on_request(void *cls, struct MHD_Connection *conn,
             unsigned char *decompressed = NULL;
 
             if (entry->compressed) {
+                /* L92 speed fast path: serve a previously inflated copy of
+                 * this entry from the shared cache (PERSISTENT) — no
+                 * per-request puff, no malloc. Falls back below when the
+                 * entry is small, the cache budget is used up, or inflation
+                 * failed. */
+                unsigned char *cached = inflated_for(entry);
+                if (cached) {
+                    payload = cached;
+                    payload_size = entry->orig_size;
+                    mem_mode = MHD_RESPMEM_PERSISTENT;
+                } else {
                 /* Inflate the raw-DEFLATE blob (src/inflate.c, vendored puff)
                  * into a fresh heap buffer; MHD frees it with MUST_FREE. */
                 decompressed = malloc(entry->orig_size + 1);
@@ -246,6 +349,7 @@ enum MHD_Result http_on_request(void *cls, struct MHD_Connection *conn,
                 payload = decompressed;
                 payload_size = destlen;
                 mem_mode = MHD_RESPMEM_MUST_FREE;
+                } /* end per-request inflate fallback */
             }
 
             /* When on firmware supported by both Poops and Relapse (7.00 - 12.00),
