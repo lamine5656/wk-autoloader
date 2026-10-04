@@ -23,6 +23,39 @@
   var lastFrameUrl = '';
   var mirrorTimer = 0;
 
+  /* Relapse stall watchdog: once the chain reports "payloads loaded" /
+     "elfldr is listening" (85%), the autoload must follow within a bounded
+     time. If it never arrives (elfldr not answering on 9021, or the payload
+     fetch hanging in AppCache-offline mode), the page would otherwise stay
+     frozen at 85% forever. After STALL_MS we recover instead of hanging. */
+  var STALL_MS = 20000;
+  var stallTimer = 0;
+
+  function clearStallWatchdog() {
+    if (stallTimer) {
+      clearTimeout(stallTimer);
+      stallTimer = 0;
+    }
+  }
+
+  function fireStallWatchdog() {
+    stallTimer = 0;
+    if (finished || exploitMode !== 'relapse') return;
+    var fw = detectFirmware();
+    uiLog('[L92] Relapse bloqué après le chargement du payload : aucun résultat d\'autoload reçu.', 'error');
+    if (fw && POOPS_FIRMWARES.indexOf(fw.str) !== -1) {
+      uiLog('[L92] Repli automatique sur poops (' + fw.str + ' supporté, 100% offline). Relance l\'app pour retenter relapse.', 'warning');
+      pivotToPoops();
+    } else {
+      uiLog('[L92] Aucune chaîne de repli sur ce firmware : redémarre la console (elfldr peut rester actif sur 9021) puis relance.', 'error');
+    }
+  }
+
+  function armStallWatchdog() {
+    if (stallTimer || finished) return;
+    stallTimer = setTimeout(fireStallWatchdog, STALL_MS);
+  }
+
   /* Build-time exploit override: "auto" (firmware table), "umtx2" (FW
      1.00-5.50), "poops" (FW 7.00-12.00) or "relapse" (FW 7.00-13.60).
      Replaced by tools/gen_file_registry.py / build_host.py / dev_server.py
@@ -195,6 +228,7 @@
      7.00-12.00 — on 12.02-13.60 relapse is the only kernel chain available. */
   function pivotToPoops() {
     if (exploitMode === 'poops') return;
+    clearStallWatchdog();
     var fw = detectFirmware();
     if (!fw || POOPS_FIRMWARES.indexOf(fw.str) === -1) {
       uiLog('[L92] Repli poops impossible sur le firmware ' + (fw ? fw.str : 'inconnu')
@@ -224,6 +258,7 @@
 
   function onAutoloadResult(data) {
     if (finished) return;
+    clearStallWatchdog();
     if (exploitMode === 'poops') {
       mirrorSlopkit();
     } else {
@@ -308,7 +343,14 @@
     else if (/Kernel: privileges ready/.test(text)) percent = 75;
     else if (/Kernel: payloads loaded|elfldr is listening/.test(text)) percent = 85;
     else if (/elfldr is up, sending/.test(text)) percent = 95;
-    if (percent > progressPercent) updateProgress(percent);
+    if (percent > progressPercent) {
+      updateProgress(percent);
+      if (percent >= 95) {
+        clearStallWatchdog();
+      } else if (percent === 85) {
+        armStallWatchdog();
+      }
+    }
   }
 
   function mirrorConsole(prefix) {
