@@ -124,7 +124,7 @@
       return EXPLOIT_MODE;
     }
     if (!fw) {
-      uiLog('[ERROR] Not a PlayStation 5 browser.', 'error');
+      uiLog('[ERREUR] Navigateur PS5 non détecté.', 'error');
       return null;
     }
     if (isUmtx2Supported(fw.num)) return 'umtx2';
@@ -155,8 +155,8 @@
     if (hasRelapse) return 'relapse';
     if (hasPoops) return 'poops';
 
-    uiLog('[ERROR] Unsupported firmware ' + fw.str +
-      ' (supported: 1.00-5.50 via umtx2, 7.00-12.00 via poops, 7.00-13.60 via relapse).', 'error');
+    uiLog('[ERREUR] Firmware ' + fw.str +
+      ' non supporté (supporté : 1.00-5.50 via umtx2, 7.00-12.00 via poops, 7.00-13.60 via relapse).', 'error');
     return null;
   }
 
@@ -177,8 +177,8 @@
       mirrorTimer = 0;
     }
     if (data.ok) {
-      uiLog('Payload loaded (' + data.bytes + ' bytes sent to elfldr).', 'success');
-      updateProgress(100, 'Autoload finished.');
+      uiLog('Payload chargé (' + data.bytes + ' octets envoyés à elfldr).', 'success');
+      updateProgress(100, 'Autoload terminé.');
 
       /* Payload is running as its own process now — unload the iframe to
          free the memory it held and avoid a browser OOM dialog.
@@ -189,12 +189,12 @@
         try { exploitEl.src = 'about:blank'; } catch (e) { }
       }
     } else {
-      uiLog('[ERROR] Autoload failed: ' + (data.why || 'unknown error'), 'error');
-      updateProgress(0, 'Autoload failed.');
+      uiLog('[ERREUR] Autoload échoué : ' + (data.why || 'erreur inconnue'), 'error');
+      updateProgress(0, 'Autoload échoué.');
     }
     setTimeout(function () {
       if (data.ok) {
-        uiLog('Payload running on the console.', 'success');
+        uiLog('Payload en cours d\'exécution sur la console.', 'success');
       }
     }, 1500);
   }
@@ -278,8 +278,8 @@
          rather than recover from it — the user reloads instead. */
       if (doc.readyState === 'complete' && mirrorConsole.warned !== frameUrl) {
         mirrorConsole.warned = frameUrl;
-        uiLog('[iframe] no exploit log at "' + (frameUrl || 'about:blank')
-          + '" — the chain may not have started. Reload the page to retry.',
+        uiLog('[iframe] aucun log d\'exploit à "' + (frameUrl || 'about:blank')
+          + '" — la chaîne n\'a peut-être pas démarré. Recharge la page pour réessayer.',
           'warning');
       }
       return;
@@ -377,11 +377,11 @@
       var isSlopkitPage = !!start || (arm && !arm.hidden);
       if (chainStarted && isSlopkitPage && slopkitRepairCount < 5) {
         slopkitRepairCount++;
-        uiLog('[iframe] re-arming (attempt ' + slopkitRepairCount + '): ' + POOPS_URL, 'info');
+        uiLog('[iframe] re-armement (tentative ' + slopkitRepairCount + ') : ' + POOPS_URL, 'info');
         try {
           exploitEl.src = POOPS_URL;
         } catch (e) {
-          uiLog('[iframe] re-arm failed: ' + (e && e.message ? e.message : e), 'error');
+          uiLog('[iframe] échec du re-armement : ' + (e && e.message ? e.message : e), 'error');
         }
       }
       return;
@@ -459,8 +459,8 @@
     if (!progressBar) progressBar = document.getElementById('progressBar');
     if (!progressLabel) progressLabel = document.getElementById('progressLabel');
 
-    uiLog('WebKit Autoloader by PLK', 'success');
-    updateProgress(0, 'Waiting to start...');
+    uiLog('L92 WebKit Autoloader', 'success');
+    updateProgress(0, 'En attente de démarrage…');
 
     window.addEventListener('message', function (event) {
       var data = event.data;
@@ -481,7 +481,7 @@
 
     var picked = pickExploit();
     if (!picked) {
-      updateProgress(0, 'Unsupported firmware.');
+      updateProgress(0, 'Firmware non supporté.');
       return;
     }
     exploitMode = picked;

@@ -1,3 +1,5 @@
+/* L92 WebKit Autoloader — design "Néon L92" */
+
 * {
   margin: 0;
   padding: 0;
@@ -11,30 +13,123 @@ body {
 }
 
 body {
-  font-family: -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
-  background: #0f172a;
-  background: -webkit-linear-gradient(180deg, #0f172a 0%, #0b1220 100%);
-  color: #e2e8f0;
+  font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: #04060e;
+  color: #e6f1ff;
   min-height: 100%;
   overflow: hidden;
 }
 
-#footer {
+/* ---------- Fond animé : aurores + grille néon (transform-only, PS5-safe) ---------- */
+
+#bg {
   position: fixed;
-  bottom: 12px;
-  left: 50%;
-  -webkit-transform: translateX(-50%);
-  transform: translateX(-50%);
-  font-size: 0.75rem;
-  color: #4b5563;
-  line-height: 1.5;
-  text-align: center;
-  z-index: 20;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 0;
+  background: #04060e;
+  pointer-events: none;
+  overflow: hidden;
 }
 
+.orb {
+  position: absolute;
+  border-radius: 50%;
+}
 
+.orb-a {
+  width: 90vmax;
+  height: 90vmax;
+  top: -42vmax;
+  left: -18vmax;
+  background: -webkit-radial-gradient(circle at center, rgba(56, 132, 255, 0.30) 0%, rgba(56, 132, 255, 0.10) 38%, rgba(4, 6, 14, 0) 68%);
+  background: radial-gradient(circle at center, rgba(56, 132, 255, 0.30) 0%, rgba(56, 132, 255, 0.10) 38%, rgba(4, 6, 14, 0) 68%);
+}
 
-/* Loader UI: centered */
+.orb-b {
+  width: 80vmax;
+  height: 80vmax;
+  right: -34vmax;
+  bottom: -38vmax;
+  background: -webkit-radial-gradient(circle at center, rgba(139, 92, 246, 0.26) 0%, rgba(34, 211, 238, 0.10) 40%, rgba(4, 6, 14, 0) 70%);
+  background: radial-gradient(circle at center, rgba(139, 92, 246, 0.26) 0%, rgba(34, 211, 238, 0.10) 40%, rgba(4, 6, 14, 0) 70%);
+}
+
+.grid {
+  position: absolute;
+  top: -12%;
+  right: -20%;
+  bottom: -12%;
+  left: -20%;
+  background-image:
+    -webkit-linear-gradient(rgba(96, 165, 250, 0.09) 1px, rgba(0, 0, 0, 0) 1px),
+    -webkit-linear-gradient(90deg, rgba(96, 165, 250, 0.09) 1px, rgba(0, 0, 0, 0) 1px);
+  background-image:
+    linear-gradient(rgba(96, 165, 250, 0.09) 1px, rgba(0, 0, 0, 0) 1px),
+    linear-gradient(90deg, rgba(96, 165, 250, 0.09) 1px, rgba(0, 0, 0, 0) 1px);
+  background-size: 64px 64px;
+  -webkit-transform: perspective(600px) rotateX(46deg) scale(1.28);
+  transform: perspective(600px) rotateX(46deg) scale(1.28);
+  -webkit-transform-origin: 50% 100%;
+  transform-origin: 50% 100%;
+}
+
+.vignette {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: -webkit-radial-gradient(ellipse at 50% 42%, rgba(0, 0, 0, 0) 46%, rgba(2, 3, 8, 0.72) 100%);
+  background: radial-gradient(ellipse at 50% 42%, rgba(0, 0, 0, 0) 46%, rgba(2, 3, 8, 0.72) 100%);
+}
+
+/* ---------- Marque ---------- */
+
+#brand {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+#brand .logo {
+  width: 3.4rem;
+  height: 3.4rem;
+  -webkit-filter: drop-shadow(0 0 16px rgba(34, 211, 238, 0.45));
+  filter: drop-shadow(0 0 16px rgba(34, 211, 238, 0.45));
+}
+
+#brand h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #22d3ee;
+  text-shadow: 0 0 22px rgba(34, 211, 238, 0.45), 0 0 60px rgba(59, 130, 246, 0.22);
+}
+
+#brand h1 span {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #e6f1ff;
+  text-shadow: none;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-top: 0.2rem;
+}
+
+/* ---------- Loader UI ---------- */
+
 #loader {
   position: relative;
   z-index: 10;
@@ -52,31 +147,33 @@ body {
   -webkit-box-pack: center;
   -webkit-justify-content: center;
   justify-content: center;
-  background: #0f172a;
-  background: -webkit-linear-gradient(180deg, #0f172a 0%, #0b1220 100%);
 }
 
-/* The iframe's document runs the exploit and reports back to app.js. */
+/* L'iframe du navigateur exécute l'exploit et rapporte à app.js. */
 #exploit {
   display: none;
 }
 
 #logWrapper {
   width: 82%;
-  height: 72%;
+  height: 62%;
   max-width: 1220px;
-  background: #05070d;
-  border: 1px solid #1e3a5f;
-  border-radius: 10px;
+  background: rgba(5, 7, 13, 0.72);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  border-radius: 16px;
   overflow-y: auto;
-  font-family: "SFMono-Regular", Menlo, Monaco, "Cascadia Mono", monospace;
-  font-size: 1.05rem;
+  font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Cascadia Mono", monospace;
+  font-size: 1.02rem;
   line-height: 1.6;
   padding: 1rem 1.25rem;
+  -webkit-box-shadow: 0 0 40px rgba(56, 132, 255, 0.10), inset 0 0 30px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0 40px rgba(56, 132, 255, 0.10), inset 0 0 30px rgba(0, 0, 0, 0.35);
 }
 
 #logContainer {
-  color: #94a3b8;
+  color: #9fb6d4;
   overflow-wrap: break-word;
   word-break: break-word;
 }
@@ -87,11 +184,12 @@ body {
 }
 
 #logContainer .info {
-  color: #94a3b8;
+  color: #9fb6d4;
 }
 
 #logContainer .success {
-  color: #7df966;
+  color: #4ade80;
+  text-shadow: 0 0 12px rgba(74, 222, 128, 0.35);
 }
 
 #logContainer .warning {
@@ -100,6 +198,7 @@ body {
 
 #logContainer .error {
   color: #f87171;
+  text-shadow: 0 0 12px rgba(248, 113, 113, 0.25);
 }
 
 #progressContainer {
@@ -107,11 +206,13 @@ body {
   width: 82%;
   max-width: 1220px;
   height: 3rem;
-  margin-top: 1.75rem;
-  background: #1b2436;
-  border: 1px solid #2c3e5a;
-  border-radius: 10px;
+  margin-top: 1.5rem;
+  background: rgba(10, 16, 32, 0.8);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  border-radius: 16px;
   overflow: hidden;
+  -webkit-box-shadow: 0 0 24px rgba(59, 130, 246, 0.12);
+  box-shadow: 0 0 24px rgba(59, 130, 246, 0.12);
 }
 
 #progressBar {
@@ -120,10 +221,13 @@ body {
   left: 0;
   height: 100%;
   width: 0%;
-  background: #38bdf8;
-  background: -webkit-linear-gradient(90deg, #2563eb 0%, #38bdf8 100%);
+  background: #22d3ee;
+  background: -webkit-linear-gradient(90deg, #2563eb 0%, #22d3ee 55%, #a855f7 100%);
+  background: linear-gradient(90deg, #2563eb 0%, #22d3ee 55%, #a855f7 100%);
   -webkit-transition: width 0.5s ease-in-out;
   transition: width 0.5s ease-in-out;
+  -webkit-box-shadow: 0 0 24px rgba(34, 211, 238, 0.5);
+  box-shadow: 0 0 24px rgba(34, 211, 238, 0.5);
 }
 
 #progressLabel {
@@ -144,7 +248,29 @@ body {
   color: #fff;
   font-size: 1rem;
   font-weight: 600;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
   z-index: 1;
   pointer-events: none;
+}
+
+/* ---------- Pied de page ---------- */
+
+#footer {
+  position: fixed;
+  bottom: 12px;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  color: #55688a;
+  line-height: 1.5;
+  text-align: center;
+  z-index: 20;
+  width: 92%;
+  max-width: 46rem;
+}
+
+#footer b {
+  color: #22d3ee;
+  font-weight: 600;
 }

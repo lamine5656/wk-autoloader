@@ -17,3 +17,9 @@ enum MHD_Result http_on_request(void *cls, struct MHD_Connection *conn,
                                 const char *url, const char *method,
                                 const char *version, const char *upload_data,
                                 size_t *upload_data_size, void **con_cls);
+
+/* Pre-inflate and cache every compressed entry worth caching (JS, HTML, CSS,
+ * wasm, elfldr, kexp, payload) so the first AppCache request never pays the
+ * slow byte-at-a-time puff cost on the PS5. Called once after the MHD daemon
+ * starts, before the browser begins caching. */
+void pre_inflate_all(void);

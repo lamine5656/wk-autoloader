@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
 
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WebKit Autoloader</title>
+  <title>L92 WebKit Autoloader</title>
   <style>
     * {
       margin: 0;
@@ -19,10 +19,9 @@
     }
 
     body {
-      font-family: -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
-      background: #0f172a;
-      background: -webkit-linear-gradient(180deg, #0f172a 0%, #0b1220 100%);
-      color: #e2e8f0;
+      font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background: #04060e;
+      color: #e6f1ff;
       display: -webkit-box;
       display: -webkit-flex;
       display: flex;
@@ -34,12 +33,36 @@
       justify-content: center;
       min-height: 100%;
       text-align: center;
+      overflow: hidden;
+    }
+
+    #bg {
+      position: fixed;
+      top: 0; right: 0; bottom: 0; left: 0;
+      z-index: 0;
+      background: -webkit-radial-gradient(ellipse at 50% 40%, rgba(15, 26, 53, 0.55), rgba(4, 6, 14, 1));
+      background: radial-gradient(ellipse at 50% 40%, rgba(15, 26, 53, 0.55), rgba(4, 6, 14, 1));
+      pointer-events: none;
+    }
+
+    main {
+      position: relative;
+      z-index: 1;
+      padding: 2rem;
+    }
+
+    .logo {
+      width: 5.5rem;
+      height: 5.5rem;
+      margin-bottom: 1.25rem;
+      -webkit-filter: drop-shadow(0 0 22px rgba(34, 211, 238, 0.5));
+      filter: drop-shadow(0 0 22px rgba(34, 211, 238, 0.5));
     }
 
     p {
-      font-size: 1.375rem;
+      font-size: 1.3rem;
       line-height: 1.5;
-      color: #94a3b8;
+      color: #9fb6d4;
     }
 
     p.bad {
@@ -49,8 +72,11 @@
 </head>
 
 <body>
+  <div id="bg"></div>
+
   <main>
-    <p id="status">Loading&hellip;</p>
+    <img class="logo" src="/logo.svg" alt="L92" />
+    <p id="status">Chargement…</p>
   </main>
 
   <script>
@@ -62,15 +88,16 @@
       var statusEl = document.getElementById('status');
 
       function fail() {
-        statusEl.textContent = 'Cache incomplete - run the installer again.';
+        statusEl.textContent = 'Cache incomplet — relance l\'installateur.';
         statusEl.className = 'bad';
       }
 
-      /* __complete__ is the LAST entry of the AppCache manifest, so if it is
-         present (with our version content) every file before it was downloaded.
-         Only then point at the app. If the marker is missing, this fetch falls
-         back to this very page (content mismatch) or errors - never redirect
-         into a partially cached directory. */
+      /* __complete__ est la DERNIÈRE entrée du manifeste AppCache : si elle est
+         présente (avec le contenu de notre version), tous les fichiers avant
+         elle ont été téléchargés. Ce n'est qu'alors qu'on pointe vers l'app.
+         Si le marqueur manque, ce fetch retombe sur cette page (contenu
+         différent) ou échoue — on ne redirige jamais vers un répertoire
+         partiellement mis en cache. */
       fetch('/app/' + dir + '/__complete__')
         .then(function (r) {
           return r.text();

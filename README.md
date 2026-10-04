@@ -11,10 +11,7 @@
 </p>
 
 <p align="center">
-    <b>Other Autoloaders:</b><br>
-    <a href="https://github.com/itsPLK/ps5-y2jb-autoloader">Y2JB</a> |
-    <a href="https://github.com/itsPLK/ps5-bdjb-autoloader">BD-JB</a> |
-    <a href="https://github.com/itsPLK/ps5-lua-autoloader">Lua</a>
+    <b>L92 WebKit Autoloader</b> — by <b>L92</b>
 </p>
 
 ## Why WebKit Autoloader?
@@ -26,7 +23,7 @@ This autoloader does it differently:
 - **Fully offline, no third-party DNS.** After a one-time install from your PC, everything is served straight from your PS5. There's nothing external to go down or change behind your back.  
   Firmwares 12.02–13.60 run **Relapse**, which requires an active network interface (Wi-Fi or Ethernet connected to a local network; Internet access is not required).
 - **One-time setup, then a homescreen shortcut.** Once it's installed, you don't need a PC or the internet — just launch "WebKit Autoloader" from the homescreen and you're done.
-- **Payloads loaded the way you already know.** After the exploit chain runs, your payloads are sent just like in [Y2JB](https://github.com/itsPLK/ps5-y2jb-autoloader) / [BD-JB](https://github.com/itsPLK/ps5-bdjb-autoloader) / [Lua](https://github.com/itsPLK/ps5-lua-autoloader) autoloaders — via **Payload Manager**, or a custom `autoload.txt`.
+- **Payloads loaded the way you already know.** After the exploit chain runs, your payloads are sent just like in other autoloaders — via **Payload Manager**, or a custom `autoload.txt`.
 
 
 ## Setup Instructions
@@ -35,7 +32,7 @@ There are two ways to set up the autoloader, depending on whether you're already
 
 ### Already jailbroken? Just load the installer ELF
 
-1. Download `webkit-autoloader-installer_vX.Y.Z.elf` from the [Releases](https://github.com/itsPLK/ps5-webkit-autoloader/releases) page.
+1. Download `webkit-autoloader-installer_vX.Y.Z.elf` from the [Releases](https://github.com/lamine5656/wk-autoloader/releases) page.
 2. Send it to your PS5 with `elfldr`, or launch it from Payload Manager.
 3. The installer opens the browser once to cache the autoloader page, then creates the **WebKit Autoloader** app on the homescreen and exits.
 4. **Reboot once**, then launch **WebKit Autoloader** from the homescreen.
@@ -44,7 +41,7 @@ There are two ways to set up the autoloader, depending on whether you're already
 
 If you aren't jailbroken yet, you'll need to host the exploit locally on your PC for the initial setup:
 
-1. Download `webkit-autoloader-host.py` (or the `.exe`) from the [Releases](https://github.com/itsPLK/ps5-webkit-autoloader/releases) and run it on a PC on your network.
+1. Download `webkit-autoloader-host.py` (or the `.exe`) from the [Releases](https://github.com/lamine5656/wk-autoloader/releases) and run it on a PC on your network.
 2. On your PS5, set your network's DNS server to your PC's IP address.
 3. Open the **User's Guide** from Settings to run the installer, which adds the **WebKit Autoloader** app to your homescreen.
 4. Launch **WebKit Autoloader** from the homescreen.
@@ -138,4 +135,4 @@ This tool is provided as-is for research and development purposes only. Use at y
 This project is licensed under the GPL-3.0 License.
 
 ## Donate
-- [donate to PLK](DONATE.md)
+- [donate to L92](DONATE.md)

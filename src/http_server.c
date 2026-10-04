@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdatomic.h>
+#include <pthread.h>
 #include <microhttpd.h>
 
 #include "wkali.h"
@@ -39,6 +40,113 @@ atomic_int webkit_data_cleared = 0;
 
 /* Active exploit chosen for this installation session ("poops", "relapse", or "umtx2"). */
 static char active_exploit[16] = {0};
+
+/* ── Inflated-entry cache ──────────────────────────────────────────────
+ * puff (src/inflate.c, vendored) inflates byte-at-a-time and is slow:
+ * re-inflating the large registry entries on every request added visible
+ * latency to first load (AppCache downloads everything) and to every
+ * repair/retry pass. MHD serves requests from a thread pool, so the
+ * cache is guarded by a mutex; the inflate itself runs outside the lock
+ * so parallel first downloads of different files still overlap. Only
+ * entries >= WKALI_CACHE_MIN_SIZE are cached (small ones inflate in
+ * microseconds) and the total is capped to keep installer-process memory
+ * bounded; anything not cached takes the per-request inflate path.
+ * Cached buffers are shared and must never be freed by the request
+ * handler — every downstream mutation (manifest filter, prompt-page
+ * copy, test hook) already copies first and only frees MUST_FREE
+ * buffers. */
+#define WKALI_CACHE_MIN_SIZE (4u * 1024u)
+#define WKALI_CACHE_MAX_BYTES (40u * 1024u * 1024u)
+#define WKALI_CACHE_MAX_ENTRIES 64
+
+static pthread_mutex_t infl_cache_lock = PTHREAD_MUTEX_INITIALIZER;
+static const FileEntry *infl_cache_entries[WKALI_CACHE_MAX_ENTRIES];
+static unsigned char *infl_cache_bufs[WKALI_CACHE_MAX_ENTRIES];
+static size_t infl_cache_count;
+static size_t infl_cache_bytes;
+
+/* Forward declarations (placed before any use, for C99 strict mode). */
+static unsigned char *inflated_for(const FileEntry *entry);
+void pre_inflate_all(void);
+
+/* Pre-inflate and cache every compressed entry worth caching (>= 4 Ko),
+ * regardless of content type — JS, HTML, CSS, wasm, the elfldr binary, the
+ * kexp and payload.elf. Called once after the MHD daemon starts, before the
+ * browser begins caching, so the first AppCache request and every later one
+ * are served straight from memory: no puff on the critical path, no
+ * per-request malloc, no stalling the browser while a multi-MB entry is
+ * inflated byte-at-a-time (a stalled WebProcess is what forces a manual
+ * reload and occasionally panics the console mid-chain). */
+void pre_inflate_all(void) {
+    unsigned int i;
+    for (i = 0; i < file_registry_count; i++) {
+        const FileEntry *e = &file_registry[i];
+        if (e->compressed && e->orig_size >= WKALI_CACHE_MIN_SIZE) {
+            (void)inflated_for(e); /* warms the cache */
+        }
+    }
+}
+
+/* Returns the shared inflated buffer for a registry entry, inflating and
+ * caching it on first use. Returns NULL when the entry is not worth
+ * caching (small), the cache budget is exhausted, or inflate failed —
+ * the caller then takes the per-request inflate path. */
+static unsigned char *inflated_for(const FileEntry *entry) {
+    unsigned char *buf = NULL;
+    size_t i;
+    int eligible;
+
+    pthread_mutex_lock(&infl_cache_lock);
+    for (i = 0; i < infl_cache_count; i++) {
+        if (infl_cache_entries[i] == entry) {
+            pthread_mutex_unlock(&infl_cache_lock);
+            return infl_cache_bufs[i];
+        }
+    }
+    eligible = (entry->orig_size >= WKALI_CACHE_MIN_SIZE &&
+                infl_cache_count < WKALI_CACHE_MAX_ENTRIES &&
+                infl_cache_bytes + entry->orig_size <= WKALI_CACHE_MAX_BYTES);
+    pthread_mutex_unlock(&infl_cache_lock);
+
+    if (!eligible)
+        return NULL;
+
+    {
+        unsigned char *fresh = malloc(entry->orig_size + 1);
+        unsigned long destlen = entry->orig_size;
+        unsigned long sourcelen = entry->size;
+
+        if (!fresh)
+            return NULL;
+        if (puff(fresh, &destlen, entry->data, &sourcelen) != 0) {
+            free(fresh);
+            return NULL;
+        }
+        fresh[destlen] = '\0';
+
+        pthread_mutex_lock(&infl_cache_lock);
+        /* Another connection may have stored this entry while we inflated. */
+        for (i = 0; i < infl_cache_count; i++) {
+            if (infl_cache_entries[i] == entry) {
+                buf = infl_cache_bufs[i];
+                break;
+            }
+        }
+        if (!buf && infl_cache_count < WKALI_CACHE_MAX_ENTRIES &&
+            infl_cache_bytes + entry->orig_size <= WKALI_CACHE_MAX_BYTES) {
+            infl_cache_entries[infl_cache_count] = entry;
+            infl_cache_bufs[infl_cache_count] = fresh;
+            infl_cache_count++;
+            infl_cache_bytes += entry->orig_size;
+        }
+        pthread_mutex_unlock(&infl_cache_lock);
+
+        if (!buf)
+            free(fresh);
+    }
+
+    return buf;
+}
 
 static void add_cors_headers(struct MHD_Response *resp) {
     MHD_add_response_header(resp, "Access-Control-Allow-Origin", CORS_ORIGIN);
@@ -259,41 +367,53 @@ enum MHD_Result http_on_request(void *cls, struct MHD_Connection *conn,
             unsigned char *decompressed = NULL;
 
             if (entry->compressed) {
-                /* Inflate the raw-DEFLATE blob (src/inflate.c, vendored puff)
-                 * into a fresh heap buffer; MHD frees it with MUST_FREE. */
-                decompressed = malloc(entry->orig_size + 1);
-                if (!decompressed) {
-                    const char *oom = "503 Out of Memory\n";
-                    resp = MHD_create_response_from_buffer(strlen(oom),
-                                                           (void *)oom,
-                                                           MHD_RESPMEM_PERSISTENT);
-                    MHD_add_response_header(resp, "Content-Type", "text/plain");
-                    http_status = MHD_HTTP_SERVICE_UNAVAILABLE;
-                    add_cors_headers(resp);
-                    enum MHD_Result ret = MHD_queue_response(conn, http_status, resp);
-                    MHD_destroy_response(resp);
-                    return ret;
+                /* Serve from the shared pre-inflated cache when possible (the
+                 * large entries were warmed at startup by pre_inflate_all, so
+                 * AppCache never waits on the slow byte-at-a-time puff).
+                 * Anything not cached (small file, budget exhausted, inflate
+                 * failure) falls back to the per-request inflate path. */
+                decompressed = inflated_for(entry);
+                if (decompressed) {
+                    payload = decompressed;
+                    payload_size = entry->orig_size;
+                    mem_mode = MHD_RESPMEM_PERSISTENT;
+                } else {
+                    /* Inflate the raw-DEFLATE blob (src/inflate.c, vendored puff)
+                     * into a fresh heap buffer; MHD frees it with MUST_FREE. */
+                    decompressed = malloc(entry->orig_size + 1);
+                    if (!decompressed) {
+                        const char *oom = "503 Out of Memory\n";
+                        resp = MHD_create_response_from_buffer(strlen(oom),
+                                                               (void *)oom,
+                                                               MHD_RESPMEM_PERSISTENT);
+                        MHD_add_response_header(resp, "Content-Type", "text/plain");
+                        http_status = MHD_HTTP_SERVICE_UNAVAILABLE;
+                        add_cors_headers(resp);
+                        enum MHD_Result ret = MHD_queue_response(conn, http_status, resp);
+                        MHD_destroy_response(resp);
+                        return ret;
+                    }
+                    unsigned long destlen = entry->orig_size;
+                    unsigned long sourcelen = entry->size;
+                    int err = puff(decompressed, &destlen, entry->data, &sourcelen);
+                    if (err != 0) {
+                        free(decompressed);
+                        const char *bad = "500 Inflate Error\n";
+                        resp = MHD_create_response_from_buffer(strlen(bad),
+                                                               (void *)bad,
+                                                               MHD_RESPMEM_PERSISTENT);
+                        MHD_add_response_header(resp, "Content-Type", "text/plain");
+                        http_status = MHD_HTTP_INTERNAL_SERVER_ERROR;
+                        add_cors_headers(resp);
+                        enum MHD_Result ret = MHD_queue_response(conn, http_status, resp);
+                        MHD_destroy_response(resp);
+                        return ret;
+                    }
+                    decompressed[destlen] = '\0';
+                    payload = decompressed;
+                    payload_size = destlen;
+                    mem_mode = MHD_RESPMEM_MUST_FREE;
                 }
-                unsigned long destlen = entry->orig_size;
-                unsigned long sourcelen = entry->size;
-                int err = puff(decompressed, &destlen, entry->data, &sourcelen);
-                if (err != 0) {
-                    free(decompressed);
-                    const char *bad = "500 Inflate Error\n";
-                    resp = MHD_create_response_from_buffer(strlen(bad),
-                                                           (void *)bad,
-                                                           MHD_RESPMEM_PERSISTENT);
-                    MHD_add_response_header(resp, "Content-Type", "text/plain");
-                    http_status = MHD_HTTP_INTERNAL_SERVER_ERROR;
-                    add_cors_headers(resp);
-                    enum MHD_Result ret = MHD_queue_response(conn, http_status, resp);
-                    MHD_destroy_response(resp);
-                    return ret;
-                }
-                decompressed[destlen] = '\0';
-                payload = decompressed;
-                payload_size = destlen;
-                mem_mode = MHD_RESPMEM_MUST_FREE;
             }
 
             /* When on firmware supported by both Poops and Relapse (7.00 - 12.00 except 9.05/11.40),

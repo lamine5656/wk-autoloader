@@ -89,7 +89,7 @@ int main(void) {
         sleep(1);
     }
 
-    wkali_log("[WKALI] WebKit Autoloader Installer v%s by PLK (built %s) starting on port %d...\n",
+    wkali_log("[WKALI] L92 WebKit Autoloader Installer v%s by L92 (built %s) starting on port %d...\n",
                    WKAL_FULL_VERSION, WKAL_BUILD_TIME, WKALI_PORT);
 
     /* Initialize PS5 System Services */
@@ -114,20 +114,28 @@ int main(void) {
     signal(SIGHUP, SIG_IGN);
     signal(SIGTERM, SIG_IGN);
 
-    /* Start the MHD daemon using a thread pool to handle concurrent AppCache requests. */
-    daemon = MHD_start_daemon(MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_DEBUG,
+    /* Start the MHD daemon using a thread pool to handle concurrent AppCache
+     * requests. MHD_USE_DEBUG is intentionally NOT set — it serializes internal
+     * logging and measurably slows down every response. */
+    daemon = MHD_start_daemon(MHD_USE_INTERNAL_POLLING_THREAD,
                               WKALI_PORT, NULL, NULL, &http_on_request,
-                              NULL, 
+                              NULL,
                               MHD_OPTION_THREAD_POOL_SIZE, (unsigned int)8,
                               MHD_OPTION_END);
 
     if (NULL == daemon) {
         wkali_log("[WKALI] Failed to start HTTP daemon!\n");
-        wkali_notify("WebKit Autoloader Installer: Error\nHTTP server failed to start");
+        wkali_notify("L92 WebKit Autoloader Installer: Error\nHTTP server failed to start");
         return 1;
     }
 
     wkali_log("[WKALI] Server running. Waiting for the browser to cache content...\n");
+
+    /* Pre-inflate every compressed entry worth caching (JS, HTML, CSS, wasm,
+     * elfldr, kexp, payload) so the first AppCache request and every later one
+     * are served straight from memory — no puff on the critical path, no
+     * per-request malloc, no stalling the browser. */
+    pre_inflate_all();
 
     /* Query foreground user ID to pass to the frontend URL so the UI can
      * display the exact /user/home/<userid>/webkit/shell/ path in prompts. */
@@ -169,22 +177,20 @@ int main(void) {
                           webkit_clear_attempts);
             }
         }
-        usleep(100000); /* 100ms sleep */
+        usleep(10000); /* 10ms sleep — fast /install & /clear-webkit-data reaction */
     }
 
     if (atomic_load(&install_completed)) {
-        wkali_notify("WebKit Autoloader v%s cached successfully!", WKAL_FULL_VERSION);
+        wkali_notify("L92 WebKit Autoloader v%s cached successfully!", WKAL_FULL_VERSION);
     }
     wkali_log_wakeup();
 
-    /* Give the /logs thread half a second to wake up and flush the final logs 
-     * over the network before we aggressively kill the MHD daemon and all sockets. */
-    usleep(500000); 
+    /* Give the /logs thread a short window to wake up and flush the final logs
+     * over the network before we shut down the MHD daemon. */
+    usleep(200000);
 
     if (daemon)
         MHD_stop_daemon(daemon);
-
-    sleep(1);
 
     return 0;
 }
