@@ -25,10 +25,11 @@
 
   /* Relapse stall watchdog: once the chain reports "payloads loaded" /
      "elfldr is listening" (85%), the autoload must follow within a bounded
-     time. If it never arrives (elfldr not answering on 9021, or the payload
-     fetch hanging in AppCache-offline mode), the page would otherwise stay
-     frozen at 85% forever. After STALL_MS we recover instead of hanging. */
-  var STALL_MS = 20000;
+     time. The 2.5 Mo payload.elf is copied into kernel memory 4 bytes at a
+     time (mapElf), which can take well over a minute — so the timeout must
+     never fire during a legitimately slow copy. After STALL_MS (120 s) we
+     recover instead of hanging forever on a truly dead autoload. */
+  var STALL_MS = 120000;
   var stallTimer = 0;
 
   function clearStallWatchdog() {
