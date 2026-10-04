@@ -5,10 +5,11 @@
 #include <stdatomic.h>
 #include "file_registry.h"
 
-/* Pre-inflate and cache the large JS entries so the first AppCache request
- * never pays the slow byte-at-a-time puff cost on the PS5. Called once after
- * the MHD daemon starts, before the browser begins caching. */
-void pre_inflate_js_files(void);
+/* Pre-inflate and cache every compressed entry worth caching (JS, HTML, CSS,
+ * wasm, elfldr, kexp, payload) so the first AppCache request never pays the
+ * slow byte-at-a-time puff cost on the PS5. Called once after the MHD daemon
+ * starts, before the browser begins caching. */
+void pre_inflate_all(void);
 
 /* Shared flags — defined in http_server.c, read/written by main.c. */
 extern atomic_int http_keep_running;

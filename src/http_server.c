@@ -65,9 +65,9 @@ static const FileEntry *registry_lookup(const char *url) {
  * handler — every downstream mutation (manifest filter, prompt-page
  * copy, test hook) already copies first and only frees MUST_FREE
  * buffers. */
-#define WKALI_CACHE_MIN_SIZE (8u * 1024u)
-#define WKALI_CACHE_MAX_BYTES (12u * 1024u * 1024u)
-#define WKALI_CACHE_MAX_ENTRIES 16
+#define WKALI_CACHE_MIN_SIZE (4u * 1024u)
+#define WKALI_CACHE_MAX_BYTES (40u * 1024u * 1024u)
+#define WKALI_CACHE_MAX_ENTRIES 64
 
 static pthread_mutex_t infl_cache_lock = PTHREAD_MUTEX_INITIALIZER;
 static const FileEntry *infl_cache_entries[WKALI_CACHE_MAX_ENTRIES];
@@ -77,20 +77,21 @@ static size_t infl_cache_bytes;
 
 /* Forward declarations (placed before any use, for C99 strict mode). */
 static unsigned char *inflated_for(const FileEntry *entry);
-void pre_inflate_js_files(void);
+void pre_inflate_all(void);
 
-/* Pre-inflate and cache the large JS entries so the first AppCache request
- * never pays the slow byte-at-a-time puff cost on the PS5. Called once after
- * the MHD daemon starts, before the browser begins caching. */
-void pre_inflate_js_files(void) {
+/* Pre-inflate and cache every compressed entry worth caching (>= 4 Ko),
+ * regardless of content type — JS, HTML, CSS, wasm, the elfldr binary, the
+ * kexp and payload.elf. Called once after the MHD daemon starts, before the
+ * browser begins caching, so the first AppCache request and every later one
+ * are served straight from memory: no puff on the critical path, no
+ * per-request malloc, no stalling the browser while a multi-MB entry is
+ * inflated byte-at-a-time (a stalled WebProcess is what forces a manual
+ * reload and occasionally panics the console mid-chain). */
+void pre_inflate_all(void) {
     unsigned int i;
     for (i = 0; i < file_registry_count; i++) {
         const FileEntry *e = &file_registry[i];
-        /* Only JS that is worth caching (>= 8 Ko). Small JS inflate in
-         * microseconds and is cheaper to pay on demand than to burn cache
-         * slots on tiny files. */
-        if (e->compressed && e->orig_size >= WKALI_CACHE_MIN_SIZE &&
-            strcmp(e->content_type, "application/javascript") == 0) {
+        if (e->compressed && e->orig_size >= WKALI_CACHE_MIN_SIZE) {
             (void)inflated_for(e); /* warms the cache */
         }
     }

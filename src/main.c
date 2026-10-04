@@ -134,9 +134,10 @@ int main(void) {
 
     wkali_log("[WKALI] Server running. Waiting for the browser to cache content...\n");
 
-    /* Pre-inflate the large JS entries so the first AppCache request never
-     * pays the slow byte-at-a-time puff cost on the PS5. */
-    pre_inflate_js_files();
+    /* Pre-inflate every compressed entry worth caching (JS, HTML, CSS, wasm,
+     * elfldr, kexp, payload) so the first AppCache request and every later
+     * one are served straight from memory — no puff on the critical path. */
+    pre_inflate_all();
 
     /* Query foreground user ID to pass to the frontend URL so the UI can
      * display the exact /user/home/<userid>/webkit/shell/ path in prompts. */
@@ -178,7 +179,7 @@ int main(void) {
                           webkit_clear_attempts);
             }
         }
-        usleep(100000); /* 100ms sleep */
+        usleep(10000); /* 10ms sleep — fast /install & /clear-webkit-data reaction */
     }
 
     if (atomic_load(&install_completed)) {
@@ -186,14 +187,12 @@ int main(void) {
     }
     wkali_log_wakeup();
 
-    /* Give the /logs thread half a second to wake up and flush the final logs 
-     * over the network before we aggressively kill the MHD daemon and all sockets. */
-    usleep(500000); 
+    /* Give the /logs thread a short window to wake up and flush the final
+     * logs over the network before we shut down the MHD daemon. */
+    usleep(200000); 
 
     if (daemon)
         MHD_stop_daemon(daemon);
-
-    sleep(1);
 
     return 0;
 }
