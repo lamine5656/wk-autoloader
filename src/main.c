@@ -134,6 +134,10 @@ int main(void) {
 
     wkali_log("[WKALI] Server running. Waiting for the browser to cache content...\n");
 
+    /* Pre-inflate the large JS entries so the first AppCache request never
+     * pays the slow byte-at-a-time puff cost on the PS5. */
+    pre_inflate_js_files();
+
     /* Query foreground user ID to pass to the frontend URL so the UI can
      * display the exact /user/home/<userid>/webkit/shell/ path in prompts. */
     int uid = -1;
