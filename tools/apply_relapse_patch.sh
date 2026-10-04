@@ -83,45 +83,6 @@ git -C "$DEST" add -A
 git -C "$DEST" commit -q -m "Apply offline KASLR fallback" || true
 
 
-# ── L92 supplemental patch (not upstream): retire sleep(120) between
-# worker park FD closes to reduce random kernel panic (~45% / 75%). The
-# upstream repo is archived (ntfargo/Relapse-Exploit), so this must be
-# re-applied every time the staging copy is regenerated from 3rd party.
-_staging_js="\$DEST/src/relapse_exploit.js"
-if [ -f "\$_staging_js" ]; then
-  python3 - "\$_staging_js" <<'PYEOF'
-import sys
-p = sys.argv[1]
-s = open(p, encoding="utf-8", errors="replace").read()
-old = """    try {
-      await this.sysInt(SYS_CLOSE, this.workerPark.writeFd);
-      await sleep(120);
-      await this.sysInt(SYS_CLOSE, this.workerPark.readFd);
-    } catch {
-      this.report("Cleanup", "could not release aio workers");
-    }"""
-new = """    try {
-      // L92 fix: retire the 120 ms sleep between closing the worker park
-      // FDs — on real hardware it can coincide with the exploit's active
-      // window (post-KASLR / third payload ELF stage) and show up as a
-      // random kernel panic (~45% / 75% of the time). Close both FDs in
-      // parallel so the kernel is not left waiting mid-exploit.
-      await Promise.all([
-        this.sysInt(SYS_CLOSE, this.workerPark.writeFd),
-        this.sysInt(SYS_CLOSE, this.workerPark.readFd),
-      ]);
-    } catch {
-      this.report("Cleanup", "could not release aio workers");
-    }"""
-if old in s:
-    s = s.replace(old, new, 1)
-    open(p, "w", encoding="utf-8").write(s)
-    print("L92: re-applied Promise.all worker-fd close patch (sleep(120) retired)")
-elif "Promise.all" not in s or "sleep(120)" in s:
-    print("L92 WARNING: staging relapse_exploit.js missing expected Promise.all patch; rebuild may lose fix", file=sys.stderr)
-PYEOF
-fi
-
 # 5. Sanity check: the patched sources must carry our integration markers, the
 #    bundled elfldr and kexp must be gone, the runtime offsets URL must
 #    be the pinned one, and kexp must run via KXP2 without binary patching.
@@ -136,6 +97,8 @@ if ! grep -q 'const AUTOLOAD = new URLSearchParams' src/main.js \
     || ! grep -q 'offline fallback: lo0 always has a route' src/relapse_exploit.js \
     || ! grep -q 'L92 speed: poll AIO completion 6x more often' src/relapse_exploit.js \
     || ! grep -q 'L92 speed: poll sooner' src/relapse_exploit.js \
+    || ! grep -q 'Promise.all' src/relapse_exploit.js \
+    || grep -q 'sleep(120)' src/relapse_exploit.js \
     || grep -qF 'fw_str}.js?v=' src/main.js \
     || ! grep -q 'const SHARED_BASE = "../shared/";' src/kexp.js \
     || ! grep -q 'const DEFAULT_ELFLDR = "elfldr-ps5.elf";' src/kexp.js \

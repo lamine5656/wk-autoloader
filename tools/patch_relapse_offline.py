@@ -23,6 +23,13 @@ upstream code changed and could not be patched.
 
 Patches 3-4 (L92 speed): tighten relapse's AIO polling sleeps so the
 payload transfer and spray-wait loops react faster (see REPLACEMENTS).
+
+Patch 5 (L92 stability): releaseAioWorkers() slept 120 ms between closing
+the two worker-park FDs. On real hardware that pause can land inside the
+exploit's active window (post-KASLR / third ELF loader stage) and show up
+as a random kernel panic (~45% / 75% load or third payload stage). Both
+FDs are now closed in parallel via Promise.all so the kernel is never
+left waiting mid-exploit.
 """
 import pathlib
 import sys
@@ -77,6 +84,32 @@ REPLACEMENTS = [
         """      if (pendingIndices.length < wantedCount) await sleep(20);""",
         """      if (pendingIndices.length < wantedCount) await sleep(5); // L92 speed: poll sooner""",
     ),
+    (
+        # L92 stability: releaseAioWorkers() slept 120 ms between closing the
+        # two worker-park FDs. On real hardware that pause can coincide with
+        # the exploit's active window (post-KASLR, third ELF loader stage)
+        # and surface as a random kernel panic (~45% / 75% load or third
+        # payload). Close both FDs in parallel instead.
+        """    try {
+      await this.sysInt(SYS_CLOSE, this.workerPark.writeFd);
+      await sleep(120);
+      await this.sysInt(SYS_CLOSE, this.workerPark.readFd);
+    } catch {
+      this.report("Cleanup", "could not release aio workers");
+    }""",
+        """    try {
+      /* L92 stability: close both worker-park FDs in parallel — the
+         upstream 120 ms sleep between the closes can land inside the
+         exploit's active window and show up as a random kernel panic
+         (~45% / 75% load or third ELF loader stage). */
+      await Promise.all([
+        this.sysInt(SYS_CLOSE, this.workerPark.writeFd),
+        this.sysInt(SYS_CLOSE, this.workerPark.readFd),
+      ]);
+    } catch {
+      this.report("Cleanup", "could not release aio workers");
+    }""",
+    ),
 ]
 
 
@@ -97,7 +130,7 @@ def main() -> int:
                   file=sys.stderr)
             return 1
     target.write_text(text, encoding="utf-8", newline="\n")
-    print("relapse: offline KASLR fallback (loopback route retry) + L92 speed patches applied.")
+    print("relapse: offline KASLR fallback (loopback route retry) + L92 speed/stability patches applied.")
     return 0
 
 
