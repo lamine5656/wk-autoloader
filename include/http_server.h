@@ -3,7 +3,15 @@
 #define HTTP_SERVER_H
 
 #include <stdatomic.h>
+#include <microhttpd.h>
 #include "file_registry.h"
+
+/* MHD request handler — implemented in http_server.c, passed to
+ * MHD_start_daemon() by main.c. */
+enum MHD_Result http_on_request(void *cls, struct MHD_Connection *conn,
+                                const char *url, const char *method,
+                                const char *version, const char *upload_data,
+                                size_t *upload_data_size, void **con_cls);
 
 /* Pre-inflate and cache every compressed entry worth caching (JS, HTML, CSS,
  * wasm, elfldr, kexp, payload) so the first AppCache request never pays the
