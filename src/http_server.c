@@ -65,7 +65,7 @@ static const FileEntry *registry_lookup(const char *url) {
  * handler — every downstream mutation (manifest filter, prompt-page
  * copy, test hook) already copies first and only frees MUST_FREE
  * buffers. */
-#define WKALI_CACHE_MIN_SIZE (64u * 1024u)
+#define WKALI_CACHE_MIN_SIZE (8u * 1024u)
 #define WKALI_CACHE_MAX_BYTES (12u * 1024u * 1024u)
 #define WKALI_CACHE_MAX_ENTRIES 16
 
