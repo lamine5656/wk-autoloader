@@ -77,12 +77,12 @@ static size_t infl_cache_bytes;
 
 /* Forward declarations (placed before any use, for C99 strict mode). */
 static unsigned char *inflated_for(const FileEntry *entry);
-static void pre_inflate_js_files(void);
+void pre_inflate_js_files(void);
 
 /* Pre-inflate and cache the large JS entries so the first AppCache request
  * never pays the slow byte-at-a-time puff cost on the PS5. Called once after
  * the MHD daemon starts, before the browser begins caching. */
-static void pre_inflate_js_files(void) {
+void pre_inflate_js_files(void) {
     unsigned int i;
     for (i = 0; i < file_registry_count; i++) {
         const FileEntry *e = &file_registry[i];
