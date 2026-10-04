@@ -247,7 +247,7 @@
     uiLog('Pivot vers poops : chaîne sélectionnée poops (7.00-12.00, 100% offline).', 'success');
     updateProgress(5);
     chainStarted = true;
-    mirrorTimer = setInterval(mirrorSlopkit, 100);
+    mirrorTimer = setInterval(mirrorSlopkit, 500);
     try {
       exploitEl.src = POOPS_URL;
       revealExploit();
@@ -612,7 +612,10 @@
         : 'relapse (kernel 7.00-13.60)'), 'success');
     exploitMode = picked;
     /* Gel des animations décoratives : le repaint permanent concurrence le
-       kernel exploit dans l'iframe sur le WebKit de la PS5. */
+       kernel exploit dans l'iframe sur le WebKit de la PS5. Le mirror reste
+       à 500 ms (comportement v0.6.5 qui faisait passer relapse) : un tick à
+       100 ms force 5× plus de layout/repaint dans le WebProcess partagé et
+       perturbe le timing de la chaîne (blocage à 85 % après 'payloads loaded'). */
     try { document.body.classList.add('chaining'); } catch (eChain) { }
     var exploitUrl = picked === 'umtx2' ? UMTX2_URL
       : picked === 'poops' ? POOPS_URL
@@ -620,10 +623,10 @@
     updateProgress(5);
 
     if (picked === 'poops') {
-      mirrorTimer = setInterval(mirrorSlopkit, 100);
+      mirrorTimer = setInterval(mirrorSlopkit, 500);
       clearSlopkitState();
     } else {
-      mirrorTimer = setInterval(function () { mirrorConsole(exploitMode); }, 100);
+      mirrorTimer = setInterval(function () { mirrorConsole(exploitMode); }, 500);
     }
 
     /* umtx2 auto-runs its chain on load when sessionStorage 'on_load_autorun'
